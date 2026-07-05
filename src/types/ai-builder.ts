@@ -1,12 +1,17 @@
 export type DraftQuestionType =
   | "short_text"
   | "paragraph"
+  | "email"
+  | "phone"
+  | "number"
   | "multiple_choice"
   | "checkbox"
+  | "dropdown"
   | "likert"
   | "rating"
   | "date"
-  | "file_upload";
+  | "file_upload"
+  | "signature";
 
 export interface DraftQuestion {
   id: string;

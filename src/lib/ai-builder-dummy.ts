@@ -8,12 +8,17 @@ import type {
 const TYPE_LABELS: Record<DraftQuestionType, string> = {
   short_text: "Teks singkat",
   paragraph: "Paragraf",
+  email: "Email",
+  phone: "Telepon",
+  number: "Angka",
   multiple_choice: "Pilihan ganda",
   checkbox: "Kotak centang",
+  dropdown: "Dropdown",
   likert: "Skala Likert",
   rating: "Rating",
   date: "Tanggal",
   file_upload: "Unggah file",
+  signature: "Tanda tangan",
 };
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -38,12 +43,13 @@ const SCENARIOS: Scenario[] = [
   {
     keywords: ["konser", "musik", "festival", "pentas", "panggung"],
     reply:
-      "Siap! Aku menyusun draft “Evaluasi Konser Musik” berisi 7 pertanyaan yang mencakup penilaian keseluruhan, sound system, tiket, dan penampil. Aku juga memasang satu logika kondisional — jika penilaian keseluruhan di bawah 3, responden diminta menjelaskan alasannya. Cek panel pratinjau, lalu lanjutkan ke Manual Builder untuk menyempurnakannya.",
+      "Siap! Aku menyusun draft “Evaluasi Konser Musik” berisi 9 pertanyaan yang mencakup penilaian keseluruhan, sound system, tiket, penampil, sampai unggah foto momen favorit. Aku juga memasang satu logika kondisional — jika penilaian keseluruhan di bawah 3, responden diminta menjelaskan alasannya. Cek panel pratinjau — kamu bisa menyeret kartu pertanyaan untuk mengubah urutannya.",
     note: "Skala Likert 1–5 kupakai untuk aspek spesifik seperti sound system karena lebih konsisten dimaknai responden dibanding skala 1–10.",
     draft: {
       title: "Evaluasi Konser Musik",
       description: "Bantu kami memahami pengalamanmu selama konser berlangsung.",
       questions: [
+        question("q_date", "date", "Tanggal konser yang kamu hadiri"),
         question("q_overall", "rating", "Bagaimana penilaianmu terhadap konser ini secara keseluruhan?", {
           scaleHint: "Skala 1–5 · 1 = Sangat buruk · 5 = Sangat luar biasa",
         }),
@@ -64,6 +70,7 @@ const SCENARIOS: Scenario[] = [
           isRequired: false,
           options: ["Instagram", "TikTok", "Rekomendasi teman", "Poster / baliho"],
         }),
+        question("q_photo", "file_upload", "Unggah foto momen favoritmu di konser", { isRequired: false }),
         question("q_suggest", "paragraph", "Apa saranmu untuk konser berikutnya?", { isRequired: false }),
       ],
     },
@@ -71,15 +78,16 @@ const SCENARIOS: Scenario[] = [
   {
     keywords: ["karyawan", "kepuasan kerja", "pegawai", "hr ", "internal", "kantor"],
     reply:
-      "Draft “Survei Kepuasan Karyawan” sudah siap — 6 pertanyaan dengan format eNPS standar industri. Ada satu logika kondisional: karyawan yang memberi skor rekomendasi 6 atau kurang akan diminta menyebutkan hal yang paling perlu diperbaiki. Silakan review di panel pratinjau.",
+      "Draft “Survei Kepuasan Karyawan” sudah siap — 7 pertanyaan dengan format eNPS standar industri. Ada satu logika kondisional: karyawan yang memberi skor rekomendasi 6 atau kurang akan diminta menyebutkan hal yang paling perlu diperbaiki. Silakan review di panel pratinjau — seret kartu pertanyaan jika ingin mengubah urutannya.",
     note: "Survei internal sebaiknya anonim — aku sengaja tidak menambahkan pertanyaan nama atau email agar jawaban lebih jujur.",
     draft: {
       title: "Survei Kepuasan Karyawan",
       description: "Survei anonim untuk memahami pengalaman kerja tim. Jawabanmu tidak dikaitkan dengan identitas.",
       questions: [
-        question("q_dept", "multiple_choice", "Di departemen mana kamu bekerja?", {
+        question("q_dept", "dropdown", "Di departemen mana kamu bekerja?", {
           options: ["Operasional", "Pemasaran", "Teknologi", "Keuangan", "SDM"],
         }),
+        question("q_tenure", "number", "Sudah berapa tahun kamu bekerja di perusahaan ini?"),
         question("q_valued", "likert", "Aku merasa dihargai atas kontribusiku di perusahaan ini.", {
           scaleHint: "Skala 1–5 · Sangat tidak setuju → Sangat setuju",
         }),
@@ -103,15 +111,16 @@ const SCENARIOS: Scenario[] = [
   {
     keywords: ["webinar", "pendaftaran", "daftar", "workshop", "seminar", "acara"],
     reply:
-      "Form “Pendaftaran Webinar” sudah kususun — 7 pertanyaan ringkas supaya calon peserta cepat selesai mendaftar. Aku menambahkan logika kondisional: kolom nama organisasi hanya muncul untuk pendaftar yang mewakili organisasi. Review strukturnya di panel pratinjau.",
+      "Form “Pendaftaran Webinar” sudah kususun — 8 pertanyaan ringkas supaya calon peserta cepat selesai mendaftar. Aku menambahkan logika kondisional: kolom nama organisasi hanya muncul untuk pendaftar yang mewakili organisasi. Review strukturnya di panel pratinjau — urutan pertanyaan bisa kamu seret sesuka hati.",
     note: "Form pendaftaran sebaiknya di bawah 10 pertanyaan — makin pendek, makin tinggi completion rate-nya.",
     draft: {
       title: "Pendaftaran Webinar",
       description: "Isi data berikut untuk mengamankan kursimu. Tautan webinar dikirim lewat email.",
       questions: [
         question("q_name", "short_text", "Nama lengkap"),
-        question("q_email", "short_text", "Alamat email aktif"),
-        question("q_session", "multiple_choice", "Pilih sesi yang ingin kamu ikuti", {
+        question("q_email", "email", "Alamat email aktif"),
+        question("q_phone", "phone", "Nomor WhatsApp aktif", { isRequired: false }),
+        question("q_session", "dropdown", "Pilih sesi yang ingin kamu ikuti", {
           options: ["Sesi pagi · 09.00 WIB", "Sesi siang · 13.00 WIB", "Sesi malam · 19.00 WIB"],
         }),
         question("q_topics", "checkbox", "Topik apa yang paling ingin kamu dengar?", {
@@ -128,6 +137,32 @@ const SCENARIOS: Scenario[] = [
         question("q_record", "multiple_choice", "Ingin menerima rekaman webinar?", {
           options: ["Ya, kirimkan", "Tidak perlu"],
         }),
+      ],
+    },
+  },
+  {
+    keywords: ["magang", "lamaran", "rekrut", "lowongan", "internship"],
+    reply:
+      "Draft “Form Lamaran Program Magang” sudah jadi — 9 pertanyaan dari data diri, unggah CV, sampai tanda tangan digital sebagai pernyataan kebenaran data. Ada satu logika kondisional: kolom tautan portofolio hanya muncul untuk pelamar posisi Product Design. Silakan review dan seret kartu untuk mengatur urutannya.",
+    note: "Pertanyaan unggah berkas dan tanda tangan kutaruh di akhir — pelamar lebih rela mengunggah dokumen setelah mengisi sebagian besar form.",
+    draft: {
+      title: "Form Lamaran Program Magang",
+      description: "Lengkapi data berikut untuk melamar program magang. Pastikan CV dalam format PDF.",
+      questions: [
+        question("q_name", "short_text", "Nama lengkap"),
+        question("q_email", "email", "Alamat email aktif"),
+        question("q_phone", "phone", "Nomor WhatsApp aktif"),
+        question("q_position", "dropdown", "Posisi magang yang dilamar", {
+          options: ["Frontend Engineer", "Backend Engineer", "Product Design", "Data Analyst"],
+        }),
+        question("q_portfolio", "short_text", "Tautan portofolio", {
+          isRequired: false,
+          logic: "Tampil hanya jika posisi yang dilamar adalah Product Design",
+        }),
+        question("q_start", "date", "Kapan kamu bisa mulai magang?"),
+        question("q_motivation", "paragraph", "Ceritakan motivasimu melamar posisi ini"),
+        question("q_cv", "file_upload", "Unggah CV terbaru (PDF)"),
+        question("q_sign", "signature", "Tanda tangan sebagai pernyataan kebenaran data"),
       ],
     },
   },
@@ -148,6 +183,7 @@ function genericDraft(prompt: string): FormDraft {
     description: "Draft awal hasil generasi Mimir — sesuaikan pertanyaannya sesuai kebutuhanmu.",
     questions: [
       question("q_name", "short_text", "Nama lengkap"),
+      question("q_email", "email", "Alamat email", { isRequired: false }),
       question("q_overall", "rating", "Bagaimana penilaianmu secara keseluruhan?", {
         scaleHint: "Skala 1–5 · 1 = Sangat buruk · 5 = Sangat baik",
       }),
@@ -168,6 +204,7 @@ export const SUGGESTION_PROMPTS = [
   "Buatkan kuesioner evaluasi konser musik, tanyakan soal sound system, tiket, dan artis",
   "Survei kepuasan karyawan dengan skala Likert, kalau skornya rendah tanyakan alasannya",
   "Form pendaftaran webinar dengan pilihan sesi dan topik yang diminati",
+  "Form lamaran magang dengan unggah CV dan tanda tangan digital",
 ];
 
 export async function generateBuilderReply(
@@ -189,7 +226,7 @@ export async function generateBuilderReply(
   }
   return {
     reply:
-      "Aku sudah menyusun draft awal berdasarkan instruksimu — 5 pertanyaan dengan satu logika kondisional sebagai fondasi. Lanjutkan percakapan ini untuk menambah pertanyaan, atau buka Manual Builder untuk menyuntingnya langsung.",
+      "Aku sudah menyusun draft awal berdasarkan instruksimu — 6 pertanyaan dengan satu logika kondisional sebagai fondasi. Lanjutkan percakapan ini untuk menambah pertanyaan, seret kartu di pratinjau untuk mengatur urutan, atau buka Manual Builder untuk menyuntingnya langsung.",
     note: "Mulai dari struktur ringkas lalu tambah pertanyaan seperlunya — form pendek menjaga completion rate tetap tinggi.",
     draft: genericDraft(prompt),
   };

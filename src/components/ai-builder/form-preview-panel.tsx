@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, GitBranch, Layout } from "@mynaui/icons-react";
 import type { FormDraft } from "@/types/ai-builder";
@@ -6,10 +9,46 @@ import { QuestionPreviewCard } from "@/components/ai-builder/question-preview-ca
 interface FormPreviewPanelProps {
   draft: FormDraft | null;
   isGenerating: boolean;
+  onReorder: (from: number, to: number) => void;
 }
 
-export function FormPreviewPanel({ draft, isGenerating }: FormPreviewPanelProps) {
+function DropIndicator({ position }: { position: "top" | "bottom" }) {
+  return (
+    <span
+      className={`pointer-events-none absolute left-1 right-1 z-10 h-[3px] rounded-full bg-brand animate-pop ${
+        position === "top" ? "-top-[7px]" : "-bottom-[7px]"
+      }`}
+    />
+  );
+}
+
+export function FormPreviewPanel({ draft, isGenerating, onReorder }: FormPreviewPanelProps) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overSlot, setOverSlot] = useState<number | null>(null);
   const logicCount = draft?.questions.filter((question) => question.logic).length ?? 0;
+  const total = draft?.questions.length ?? 0;
+
+  function resetDrag() {
+    setDragIndex(null);
+    setOverSlot(null);
+  }
+
+  function handleDragOver(event: React.DragEvent<HTMLDivElement>, index: number) {
+    if (dragIndex === null) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    const rect = event.currentTarget.getBoundingClientRect();
+    setOverSlot(index + (event.clientY > rect.top + rect.height / 2 ? 1 : 0));
+  }
+
+  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    if (dragIndex !== null && overSlot !== null) {
+      const to = overSlot > dragIndex ? overSlot - 1 : overSlot;
+      if (to !== dragIndex) onReorder(dragIndex, to);
+    }
+    resetDrag();
+  }
 
   return (
     <section
@@ -26,7 +65,7 @@ export function FormPreviewPanel({ draft, isGenerating }: FormPreviewPanelProps)
         {draft && (
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-overlay px-2.5 py-0.5 text-xs font-medium text-muted">
-              {draft.questions.length} pertanyaan
+              {total} pertanyaan
             </span>
             {logicCount > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-accent-subtle px-2.5 py-0.5 text-xs font-medium text-accent-text">
@@ -72,7 +111,26 @@ export function FormPreviewPanel({ draft, isGenerating }: FormPreviewPanelProps)
               <p className="mt-1 text-[13px] leading-relaxed text-muted">{draft.description}</p>
             </div>
             {draft.questions.map((question, index) => (
-              <QuestionPreviewCard key={question.id} question={question} index={index} />
+              <div
+                key={question.id}
+                className="relative"
+                onDragOver={(event) => handleDragOver(event, index)}
+                onDrop={handleDrop}
+              >
+                {dragIndex !== null && overSlot === index && <DropIndicator position="top" />}
+                <QuestionPreviewCard
+                  question={question}
+                  index={index}
+                  total={total}
+                  isDragging={dragIndex === index}
+                  onDragStart={() => setDragIndex(index)}
+                  onDragEnd={resetDrag}
+                  onMove={onReorder}
+                />
+                {dragIndex !== null && index === total - 1 && overSlot === total && (
+                  <DropIndicator position="bottom" />
+                )}
+              </div>
             ))}
           </div>
         )}
@@ -81,7 +139,7 @@ export function FormPreviewPanel({ draft, isGenerating }: FormPreviewPanelProps)
       {draft && (
         <footer className="flex items-center justify-between gap-3 border-t border-line-subtle bg-subtle px-5 py-3.5">
           <p className="hidden text-xs leading-snug text-muted sm:block">
-            Hasil AI selalu bisa direview dan diedit sebelum terbit.
+            Seret kartu atau pakai tombol panah untuk mengatur urutan pertanyaan.
           </p>
           <Link
             href="/forms/new?mode=manual"
