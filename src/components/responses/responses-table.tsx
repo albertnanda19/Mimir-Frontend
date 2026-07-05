@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useDeferredValue, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, SearchX } from "@mynaui/icons-react";
 import type { DraftQuestion } from "@/types/ai-builder";
 import type { ResponseRow } from "@/lib/responses-data";
@@ -14,6 +14,8 @@ const PAGE_SIZES = [
 ];
 
 type SortKey = "time" | "duration" | string;
+
+const collator = new Intl.Collator("id");
 
 interface ResponsesTableProps {
   questions: DraftQuestion[];
@@ -66,18 +68,15 @@ export function ResponsesTable({ questions, rows }: ResponsesTableProps) {
   const [pageSize, setPageSize] = useState(10);
   const [detail, setDetail] = useState<{ row: ResponseRow; number: number } | null>(null);
 
-  const normalized = query.trim().toLowerCase();
-  const filtered = normalized
-    ? rows.filter((row) =>
-        Object.values(row.answers).some((answer) => answer.toLowerCase().includes(normalized)),
-      )
-    : rows;
+  const deferredQuery = useDeferredValue(query);
+  const normalized = deferredQuery.trim().toLowerCase();
+  const filtered = normalized ? rows.filter((row) => row.searchText.includes(normalized)) : rows;
 
   const sorted = [...filtered].sort((a, b) => {
     const direction = sortDir === "asc" ? 1 : -1;
     if (sortKey === "time") return (a.submittedAtMs - b.submittedAtMs) * direction;
     if (sortKey === "duration") return (a.durationSec - b.durationSec) * direction;
-    return (a.answers[sortKey] ?? "").localeCompare(b.answers[sortKey] ?? "", "id") * direction;
+    return collator.compare(a.answers[sortKey] ?? "", b.answers[sortKey] ?? "") * direction;
   });
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));

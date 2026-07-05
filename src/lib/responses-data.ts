@@ -10,6 +10,7 @@ export interface ResponseRow {
   durationLabel: string;
   durationSec: number;
   answers: Record<string, string>;
+  searchText: string;
 }
 
 export interface FormResponses {
@@ -140,6 +141,7 @@ function generateRows(formId: string, questions: DraftQuestion[], total: number)
       durationLabel: formatDuration(durationSec),
       durationSec,
       answers,
+      searchText: Object.values(answers).join(" ").toLowerCase(),
     });
   }
   return rows.sort((a, b) => b.submittedAtMs - a.submittedAtMs);
