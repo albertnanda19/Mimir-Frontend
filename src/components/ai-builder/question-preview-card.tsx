@@ -1,42 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Calendar,
-  CheckSquare,
-  ChevronDown,
-  ChevronDownCircle,
-  ChevronUp,
-  GitBranch,
-  Hash,
-  List,
-  ListNumber,
-  Mail,
-  Menu,
-  Pen,
-  Star,
-  Telephone,
-  TextAlignLeft,
-  TextJustify,
-  Upload,
-} from "@mynaui/icons-react";
-import type { DraftQuestion, DraftQuestionType } from "@/types/ai-builder";
-
-const TYPE_ICONS: Record<DraftQuestionType, typeof List> = {
-  short_text: TextAlignLeft,
-  paragraph: TextJustify,
-  email: Mail,
-  phone: Telephone,
-  number: Hash,
-  multiple_choice: List,
-  checkbox: CheckSquare,
-  dropdown: ChevronDownCircle,
-  likert: ListNumber,
-  rating: Star,
-  date: Calendar,
-  file_upload: Upload,
-  signature: Pen,
-};
+import { ChevronDown, ChevronUp, GitBranch, Menu } from "@mynaui/icons-react";
+import type { DraftQuestion } from "@/types/ai-builder";
+import { TYPE_ICONS } from "@/lib/field-types";
 
 interface QuestionPreviewCardProps {
   question: DraftQuestion;

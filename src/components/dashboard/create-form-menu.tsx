@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Plus, Sparkles, Grid, ChevronDown } from "@mynaui/icons-react";
+import { clearDraft } from "@/lib/draft-store";
 
 const OPTIONS = [
   {
@@ -62,7 +63,10 @@ export function CreateFormMenu() {
             <Link
               key={href}
               href={href}
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                clearDraft();
+                setIsOpen(false);
+              }}
               role="menuitem"
               className="flex cursor-pointer items-start gap-3 rounded-md p-2.5 transition-colors duration-100 hover:bg-overlay"
             >

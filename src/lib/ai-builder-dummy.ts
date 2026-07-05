@@ -4,22 +4,7 @@ import type {
   DraftQuestionType,
   FormDraft,
 } from "@/types/ai-builder";
-
-const TYPE_LABELS: Record<DraftQuestionType, string> = {
-  short_text: "Teks singkat",
-  paragraph: "Paragraf",
-  email: "Email",
-  phone: "Telepon",
-  number: "Angka",
-  multiple_choice: "Pilihan ganda",
-  checkbox: "Kotak centang",
-  dropdown: "Dropdown",
-  likert: "Skala Likert",
-  rating: "Rating",
-  date: "Tanggal",
-  file_upload: "Unggah file",
-  signature: "Tanda tangan",
-};
+import { TYPE_LABELS } from "@/lib/field-types";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

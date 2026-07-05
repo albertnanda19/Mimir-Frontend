@@ -3,10 +3,10 @@
 import { useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Sparkles } from "@mynaui/icons-react";
+import { ArrowLeft, Grid, Sparkles } from "@mynaui/icons-react";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { AiBuilderWorkspace } from "@/components/ai-builder/ai-builder-workspace";
-import { ManualBuilderPlaceholder } from "@/components/ai-builder/manual-builder-placeholder";
+import { ManualBuilderWorkspace } from "@/components/manual-builder/manual-builder-workspace";
 import { getSession, getSessionSnapshot, subscribeSession } from "@/lib/auth-dummy";
 
 export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
@@ -54,7 +54,12 @@ export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
                   </p>
                 </div>
               </div>
-              {mode === "ai" && (
+              {mode === "manual" ? (
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-subtle px-3 py-1 text-xs font-medium text-brand-text">
+                  <Grid className="size-3.5" />
+                  Manual Builder
+                </span>
+              ) : (
                 <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent-subtle px-3 py-1 text-xs font-medium text-accent-text">
                   <Sparkles className="size-3.5" />
                   AI Chat Builder
@@ -62,7 +67,7 @@ export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
               )}
             </div>
 
-            {mode === "manual" ? <ManualBuilderPlaceholder /> : <AiBuilderWorkspace />}
+            {mode === "manual" ? <ManualBuilderWorkspace /> : <AiBuilderWorkspace />}
           </>
         )}
       </main>
