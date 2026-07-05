@@ -65,15 +65,18 @@ export function ClusterList({
 export function CleanupCard({
   cleanup,
   onInspect,
+  onApply,
 }: {
   cleanup: CleanupProposal;
   onInspect: () => void;
+  onApply: () => void;
 }) {
   const [stage, setStage] = useState<"idle" | "working" | "done">("idle");
 
   async function handleApply() {
     setStage("working");
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    onApply();
     setStage("done");
   }
 
@@ -89,7 +92,7 @@ export function CleanupCard({
           </p>
           <p className="text-[13px] leading-relaxed text-muted">
             {stage === "done"
-              ? "Tabel respons sudah diperbarui. Aksi ini tercatat di riwayat."
+              ? "Tabel respons dan statistik sudah diperbarui."
               : `${cleanup.count} respons cocok dengan kriteria ini. Aksi tidak bisa dibatalkan.`}
           </p>
         </div>

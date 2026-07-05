@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { GitBranch, Sparkles } from "@mynaui/icons-react";
-import type { FormResponses } from "@/lib/responses-data";
+import { removeResponses, type FormResponses } from "@/lib/responses-data";
 import type { AnalysisChart, AnalysisMessage } from "@/types/tanya-mimir";
 import { analyzeData, ANALYSIS_PROMPTS } from "@/lib/tanya-mimir-dummy";
 import { ChatComposer } from "@/components/ai-builder/chat-composer";
@@ -171,10 +171,11 @@ export function MimirChat({ data }: { data: FormResponses }) {
                         cleanup={message.cleanup}
                         onInspect={() =>
                           setDrill({
-                            title: "Respons terindikasi spam",
+                            title: "Respons yang akan dibersihkan",
                             rowIds: message.cleanup!.rowIds,
                           })
                         }
+                        onApply={() => removeResponses(data.form.id, message.cleanup!.rowIds)}
                       />
                     )}
                   </div>

@@ -148,6 +148,7 @@ function generateRows(formId: string, questions: DraftQuestion[], total: number)
 }
 
 const cache = new Map<string, FormResponses>();
+const listeners = new Set<() => void>();
 
 export function getFormResponses(formId: string): FormResponses {
   const cached = cache.get(formId);
@@ -165,6 +166,20 @@ export function getFormResponses(formId: string): FormResponses {
   return result;
 }
 
-export function subscribeNoop(): () => void {
-  return () => {};
+export function removeResponses(formId: string, rowIds: string[]): void {
+  const current = cache.get(formId);
+  if (!current || rowIds.length === 0) return;
+  const removed = new Set(rowIds);
+  const rows = current.rows.filter((row) => !removed.has(row.id));
+  cache.set(formId, {
+    ...current,
+    form: { ...current.form, responses: rows.length },
+    rows,
+  });
+  listeners.forEach((listener) => listener());
+}
+
+export function subscribeResponses(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
 }

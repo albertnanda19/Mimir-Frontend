@@ -157,7 +157,8 @@ export const ANALYSIS_PROMPTS = [
   "Tunjukkan tren respons per hari",
   "Kelompokkan masukan teks jadi beberapa kategori",
   "Ringkas hasil form ini",
-  "Cari respons yang terindikasi spam",
+  "Hapus respons yang durasinya di bawah 40 detik",
+  "Cari respons duplikat",
 ];
 
 export async function analyzeData(prompt: string, data: FormResponses): Promise<AnalysisReply> {
@@ -167,12 +168,46 @@ export async function analyzeData(prompt: string, data: FormResponses): Promise<
   const scaleQuestion = findQuestion(questions, ["rating", "likert"]);
   const choiceQuestion = findQuestion(questions, ["multiple_choice", "dropdown", "checkbox"]);
 
-  if (/(spam|bersih|bot|duplikat|hapus)/.test(lower)) {
-    const suspects = rows.filter((row) => row.durationSec < 40);
+  if (/(duplikat|ganda|dobel|sama persis)/.test(lower)) {
+    const seen = new Map<string, string>();
+    const duplicates: string[] = [];
+    for (const row of rows) {
+      const original = seen.get(row.searchText);
+      if (original) {
+        duplicates.push(row.id);
+      } else {
+        seen.set(row.searchText, row.id);
+      }
+    }
+    if (duplicates.length === 0) {
+      return {
+        reply:
+          "Kabar baik — aku membandingkan isi seluruh respons dan tidak menemukan satu pun yang duplikat. Semua jawaban unik, tidak ada yang perlu dibersihkan.",
+      };
+    }
     return {
-      reply: `Aku memeriksa durasi pengisian seluruh respons. Ada ${suspects.length} respons yang diselesaikan kurang dari 40 detik — terlalu cepat untuk form sepanjang ini, jadi kuat dugaan asal isi atau bot. Aku sudah siapkan usulan pembersihannya di bawah; data baru benar-benar dihapus setelah kamu konfirmasi.`,
+      reply: `Aku membandingkan isi jawaban seluruh respons dan menemukan ${duplicates.length} respons yang isinya sama persis dengan respons lain — biasanya karena responden menekan kirim berulang kali. Satu salinan tetap kupertahankan; sisanya kuusulkan dihapus. Periksa dulu datanya kalau ragu.`,
       cleanup: {
-        description: "Hapus respons dengan durasi pengisian di bawah 40 detik",
+        description: "Hapus respons duplikat (isi sama persis, menyisakan satu salinan)",
+        count: duplicates.length,
+        rowIds: duplicates,
+      },
+    };
+  }
+
+  if (/(spam|bersih|bot|hapus|durasi)/.test(lower)) {
+    const parsed = lower.match(/(\d+)\s*detik/);
+    const threshold = parsed ? Number(parsed[1]) : 40;
+    const suspects = rows.filter((row) => row.durationSec < threshold);
+    if (suspects.length === 0) {
+      return {
+        reply: `Aku memeriksa durasi pengisian seluruh respons — tidak ada yang selesai di bawah ${threshold} detik. Datamu terlihat bersih; coba naikkan ambangnya kalau ingin lebih ketat (mis. “hapus yang di bawah ${threshold + 20} detik”).`,
+      };
+    }
+    return {
+      reply: `Aku memeriksa durasi pengisian seluruh respons. Ada ${suspects.length} respons yang diselesaikan kurang dari ${threshold} detik — terlalu cepat untuk form sepanjang ini, jadi kuat dugaan asal isi atau bot. Kamu bisa memeriksa datanya dulu; penghapusan baru terjadi setelah kamu konfirmasi.${parsed ? "" : " Mau ambang yang berbeda? Sebut saja, mis. “hapus yang di bawah 60 detik”."}`,
+      cleanup: {
+        description: `Hapus respons dengan durasi pengisian di bawah ${threshold} detik`,
         count: suspects.length,
         rowIds: suspects.map((row) => row.id),
       },

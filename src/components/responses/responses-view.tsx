@@ -17,7 +17,8 @@ import {
 import type { FormStatus } from "@/types/form";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { getSession, getSessionSnapshot, subscribeSession } from "@/lib/auth-dummy";
-import { getFormResponses, subscribeNoop } from "@/lib/responses-data";
+import { getFormResponses, subscribeResponses } from "@/lib/responses-data";
+import { ExportMenu } from "@/components/responses/export-menu";
 import { STATUS_META } from "@/lib/dashboard-data";
 import { toSlug } from "@/lib/respondent";
 import { ResponsesTable } from "@/components/responses/responses-table";
@@ -46,7 +47,7 @@ type TabId = (typeof TABS)[number]["id"];
 export function ResponsesView({ formId }: { formId: string }) {
   const router = useRouter();
   const user = useSyncExternalStore(subscribeSession, getSessionSnapshot, () => null);
-  const data = useSyncExternalStore(subscribeNoop, () => getFormResponses(formId), () => null);
+  const data = useSyncExternalStore(subscribeResponses, () => getFormResponses(formId), () => null);
   const [tab, setTab] = useState<TabId>("table");
 
   useEffect(() => {
@@ -113,14 +114,17 @@ export function ResponsesView({ formId }: { formId: string }) {
               </div>
             </div>
           </div>
-          <Link
-            href={`/f/${toSlug(form.title)}`}
-            target="_blank"
-            className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 self-start rounded-md border border-line bg-surface px-4 text-sm font-medium text-muted transition-all duration-150 hover:border-brand hover:text-brand-text active:scale-[0.98] sm:self-auto"
-          >
-            Buka form
-            <ArrowUpRight className="size-4" />
-          </Link>
+          <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
+            <ExportMenu title={form.title} questions={questions} rows={rows} />
+            <Link
+              href={`/f/${toSlug(form.title)}`}
+              target="_blank"
+              className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-md border border-line bg-surface px-4 text-sm font-medium text-muted transition-all duration-150 hover:border-brand hover:text-brand-text active:scale-[0.98]"
+            >
+              Buka form
+              <ArrowUpRight className="size-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
