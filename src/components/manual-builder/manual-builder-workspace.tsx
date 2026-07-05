@@ -6,7 +6,7 @@ import type { DraftQuestion, DraftQuestionType, FormDraft } from "@/types/ai-bui
 import { createQuestion, retypeQuestion, EMPTY_DRAFT } from "@/lib/field-types";
 import { loadDraft, saveDraft } from "@/lib/draft-store";
 import { useBuilderChat } from "@/hooks/use-builder-chat";
-import { BuilderChatWidget } from "@/components/manual-builder/builder-chat-widget";
+import { ChatPanel } from "@/components/ai-builder/chat-panel";
 import { FieldPalette } from "@/components/manual-builder/field-palette";
 import { BuilderCanvas } from "@/components/manual-builder/builder-canvas";
 import { QuestionSettingsPanel } from "@/components/manual-builder/question-settings-panel";
@@ -126,7 +126,13 @@ export function ManualBuilderWorkspace() {
         </button>
       </div>
 
-      <div className="grid flex-1 gap-4 lg:min-h-0 lg:grid-cols-[240px_minmax(0,1fr)_300px]">
+      <div className="grid flex-1 gap-4 lg:min-h-0 lg:grid-cols-[280px_220px_minmax(0,1fr)_260px] xl:grid-cols-[340px_240px_minmax(0,1fr)_300px]">
+        <ChatPanel
+          messages={chat.messages}
+          isThinking={chat.isThinking}
+          isBusy={chat.isBusy}
+          onSend={chat.send}
+        />
         <FieldPalette
           onAdd={(type) => handleInsert(type, draft.questions.length)}
           onDragStart={setDraggedPaletteType}
@@ -155,13 +161,6 @@ export function ManualBuilderWorkspace() {
 
       {openDialog === "preview" && <FormPreviewModal draft={draft} onClose={() => setOpenDialog(null)} />}
       {openDialog === "publish" && <PublishDialog draft={draft} onClose={() => setOpenDialog(null)} />}
-
-      <BuilderChatWidget
-        messages={chat.messages}
-        isThinking={chat.isThinking}
-        isBusy={chat.isBusy}
-        onSend={chat.send}
-      />
     </div>
   );
 }
