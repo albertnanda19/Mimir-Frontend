@@ -198,26 +198,34 @@
   }
 }
 
-@utility scrollbar-slim {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
+@supports (-moz-appearance: none) {
+  * {
+    scrollbar-width: thin;
   }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
+  *:not(html):not(body) {
+    scrollbar-color: transparent transparent;
   }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--border-strong);
-    border-radius: 9999px;
+  *:not(html):not(body):hover {
+    scrollbar-color: var(--iron-400) transparent;
   }
+}
 
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--text-tertiary);
-  }
+*:not(html):not(body)::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*:not(html):not(body)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*:not(html):not(body)::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+}
+
+*:not(html):not(body):hover::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
 }
 
 @utility animate-enter {

@@ -85,8 +85,8 @@ export function BuilderCanvas({
       aria-label="Kanvas form"
       className="flex min-h-[24rem] flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-[var(--elevation-1)] lg:h-full lg:min-h-0"
     >
-      <div className="scrollbar-slim flex-1 overflow-y-auto p-5">
-        <div className="mx-auto w-full max-w-3xl">
+      <div className="flex-1 overflow-y-auto p-5">
+        <div className="mx-auto w-full max-w-2xl">
         <div className="mb-4 flex flex-col gap-1 rounded-lg bg-brand-subtle p-4 animate-enter">
           <input
             type="text"

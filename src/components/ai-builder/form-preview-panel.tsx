@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, GitBranch, Layout } from "@mynaui/icons-react";
 import type { FormDraft } from "@/types/ai-builder";
-import { saveDraft } from "@/lib/draft-store";
 import { formatLogic } from "@/lib/logic";
 import { QuestionPreviewCard } from "@/components/ai-builder/question-preview-card";
 
@@ -80,7 +79,7 @@ export function FormPreviewPanel({ draft, isGenerating, onReorder }: FormPreview
         )}
       </header>
 
-      <div className="scrollbar-slim flex-1 overflow-y-auto p-5">
+      <div className="flex-1 overflow-y-auto p-5">
         {!draft && isGenerating ? (
           <div className="flex flex-col gap-3">
             <div className="h-16 animate-pulse rounded-lg bg-overlay" />
@@ -147,7 +146,6 @@ export function FormPreviewPanel({ draft, isGenerating, onReorder }: FormPreview
           </p>
           <Link
             href="/forms/new?mode=manual"
-            onClick={() => saveDraft(draft)}
             className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-md bg-brand px-4 text-sm font-medium text-white shadow-[var(--elevation-1)] transition-all duration-150 hover:bg-brand-hover hover:shadow-[var(--elevation-2)] active:scale-[0.98]"
           >
             Review di Manual Builder

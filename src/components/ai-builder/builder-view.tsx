@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Grid, Sparkles } from "@mynaui/icons-react";
 import { AppNavbar } from "@/components/layout/app-navbar";
+import { BuilderStepper } from "@/components/ai-builder/builder-stepper";
 import { AiBuilderWorkspace } from "@/components/ai-builder/ai-builder-workspace";
 import { ManualBuilderWorkspace } from "@/components/manual-builder/manual-builder-workspace";
 import { getSession, getSessionSnapshot, subscribeSession } from "@/lib/auth-dummy";
@@ -57,6 +58,9 @@ export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
                       : "Jelaskan kebutuhanmu — Mimir menyusun struktur formnya."}
                   </p>
                 </div>
+              </div>
+              <div className="hidden flex-1 justify-center lg:flex">
+                <BuilderStepper current={mode === "manual" ? 2 : 1} />
               </div>
               {mode === "manual" ? (
                 <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-subtle px-3 py-1 text-xs font-medium text-brand-text">

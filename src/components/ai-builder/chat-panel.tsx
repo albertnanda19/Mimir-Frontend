@@ -39,7 +39,7 @@ export function ChatPanel({ messages, isThinking, isBusy, onSend }: ChatPanelPro
         </div>
       </header>
 
-      <div ref={scrollRef} className="scrollbar-slim flex-1 overflow-y-auto p-5">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-5">
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-6 text-center animate-enter">
             <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-subtle text-brand-text">

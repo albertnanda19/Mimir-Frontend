@@ -126,7 +126,7 @@ export function ManualBuilderWorkspace() {
         </button>
       </div>
 
-      <div className="grid flex-1 gap-4 lg:min-h-0 lg:grid-cols-[280px_220px_minmax(0,1fr)_260px] xl:grid-cols-[340px_240px_minmax(0,1fr)_300px]">
+      <div className="grid flex-1 gap-4 lg:min-h-0 lg:grid-cols-[280px_220px_minmax(0,1fr)_300px] xl:grid-cols-[340px_240px_minmax(0,1fr)_360px]">
         <ChatPanel
           messages={chat.messages}
           isThinking={chat.isThinking}

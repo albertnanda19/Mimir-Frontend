@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 
 const themeInit = `(function(){try{var t=localStorage.getItem("mimir.theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.setAttribute("data-theme","dark")}}catch(e){}})()`;
 
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

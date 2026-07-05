@@ -46,7 +46,7 @@ export function ChatComposer({ isBusy, onSend }: ChatComposerProps) {
           onKeyDown={handleKeyDown}
           placeholder="Jelaskan form yang ingin kamu buat…"
           aria-label="Instruksi untuk Mimir"
-          className="scrollbar-slim max-h-40 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed text-ink outline-none placeholder:text-faint"
+          className="max-h-40 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed text-ink outline-none placeholder:text-faint"
         />
         <button
           type="button"

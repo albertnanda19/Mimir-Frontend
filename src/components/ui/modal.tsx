@@ -49,7 +49,7 @@ export function Modal({ title, onClose, children, maxWidthClass = "max-w-xl" }: 
             <X className="size-[18px]" />
           </button>
         </header>
-        <div className="scrollbar-slim flex-1 overflow-y-auto p-5">{children}</div>
+        <div className="flex-1 overflow-y-auto p-5">{children}</div>
       </div>
     </div>,
     document.body,

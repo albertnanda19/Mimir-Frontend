@@ -46,14 +46,14 @@ export function QuestionSettingsPanel({
           </p>
         </div>
       ) : (
-        <div key={question.id} className="scrollbar-slim flex flex-1 flex-col gap-5 overflow-y-auto p-4 animate-enter">
+        <div key={question.id} className="flex flex-1 flex-col gap-5 overflow-y-auto p-4 animate-enter">
           <label className="flex flex-col gap-1.5">
             <span className="text-[13px] font-medium tracking-[-0.01em] text-muted">Pertanyaan</span>
             <textarea
               rows={2}
               value={question.label}
               onChange={(event) => onUpdate({ label: event.target.value })}
-              className="scrollbar-slim w-full resize-none rounded-md border border-line bg-surface px-3 py-2.5 text-sm leading-snug text-ink outline-none transition-all duration-150 placeholder:text-faint hover:border-line-strong focus:border-brand focus:shadow-[0_0_0_3px_var(--brand-subtle)]"
+              className="w-full resize-none rounded-md border border-line bg-surface px-3 py-2.5 text-sm leading-snug text-ink outline-none transition-all duration-150 placeholder:text-faint hover:border-line-strong focus:border-brand focus:shadow-[0_0_0_3px_var(--brand-subtle)]"
             />
           </label>
 

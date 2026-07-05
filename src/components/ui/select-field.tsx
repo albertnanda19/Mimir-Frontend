@@ -140,7 +140,7 @@ export function SelectField({
               <p className="text-[13px] text-muted">Tidak ada hasil untuk “{query.trim()}”</p>
             </div>
           ) : (
-            <ul ref={listRef} role="listbox" aria-label={ariaLabel} className="scrollbar-slim max-h-64 overflow-y-auto p-1.5">
+            <ul ref={listRef} role="listbox" aria-label={ariaLabel} className="max-h-64 overflow-y-auto p-1.5">
               {visible.map((option, index) => {
                 const isSelected = option.value === value;
                 return (

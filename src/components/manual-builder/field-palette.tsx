@@ -20,7 +20,7 @@ export function FieldPalette({ onAdd, onDragStart, onDragEnd }: FieldPaletteProp
         <p className="mt-0.5 text-xs leading-snug text-muted">Klik atau seret ke kanvas untuk menambah.</p>
       </header>
 
-      <div className="scrollbar-slim flex-1 overflow-y-auto p-3">
+      <div className="flex-1 overflow-y-auto p-3">
         {FIELD_GROUPS.map((group) => (
           <div key={group.label} className="mb-4 last:mb-0">
             <p className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">
