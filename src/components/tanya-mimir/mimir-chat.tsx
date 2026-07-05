@@ -32,8 +32,17 @@ export function MimirChat({ data }: { data: FormResponses }) {
     [],
   );
 
+  const messageCountRef = useRef(0);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const isNewMessage = messages.length !== messageCountRef.current;
+    messageCountRef.current = messages.length;
+    if (isNewMessage || isThinking) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [messages, isThinking]);
 
   async function handleSend(prompt: string) {
