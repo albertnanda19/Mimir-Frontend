@@ -40,7 +40,10 @@ const SCENARIOS: Scenario[] = [
         }),
         question("q_reason", "paragraph", "Apa yang membuat pengalamanmu kurang menyenangkan?", {
           isRequired: false,
-          logic: "Tampil hanya jika penilaian keseluruhan kurang dari 3",
+          logic: {
+            combinator: "and",
+            rules: [{ id: "r_konser_1", questionId: "q_overall", operator: "lt", value: "3" }],
+          },
         }),
         question("q_sound", "likert", "Seberapa puas kamu dengan kualitas sound system?", {
           scaleHint: "Skala 1–5 · Sangat tidak puas → Sangat puas",
@@ -84,7 +87,10 @@ const SCENARIOS: Scenario[] = [
         }),
         question("q_improve", "paragraph", "Apa satu hal yang paling perlu diperbaiki?", {
           isRequired: false,
-          logic: "Tampil hanya jika skor rekomendasi 6 atau kurang",
+          logic: {
+            combinator: "and",
+            rules: [{ id: "r_hr_1", questionId: "q_enps", operator: "lte", value: "6" }],
+          },
         }),
         question("q_aspect", "checkbox", "Aspek mana yang paling memengaruhi kepuasanmu?", {
           isRequired: false,
@@ -117,7 +123,12 @@ const SCENARIOS: Scenario[] = [
         }),
         question("q_org", "short_text", "Nama organisasi / instansi", {
           isRequired: false,
-          logic: "Tampil hanya jika mendaftar sebagai perwakilan organisasi",
+          logic: {
+            combinator: "and",
+            rules: [
+              { id: "r_web_1", questionId: "q_as", operator: "selected", value: "Perwakilan organisasi" },
+            ],
+          },
         }),
         question("q_record", "multiple_choice", "Ingin menerima rekaman webinar?", {
           options: ["Ya, kirimkan", "Tidak perlu"],
@@ -142,7 +153,12 @@ const SCENARIOS: Scenario[] = [
         }),
         question("q_portfolio", "short_text", "Tautan portofolio", {
           isRequired: false,
-          logic: "Tampil hanya jika posisi yang dilamar adalah Product Design",
+          logic: {
+            combinator: "and",
+            rules: [
+              { id: "r_magang_1", questionId: "q_position", operator: "selected", value: "Product Design" },
+            ],
+          },
         }),
         question("q_start", "date", "Kapan kamu bisa mulai magang?"),
         question("q_motivation", "paragraph", "Ceritakan motivasimu melamar posisi ini"),
@@ -174,7 +190,10 @@ function genericDraft(prompt: string): FormDraft {
       }),
       question("q_reason", "paragraph", "Ceritakan alasan di balik penilaianmu", {
         isRequired: false,
-        logic: "Tampil hanya jika penilaian keseluruhan kurang dari 3",
+        logic: {
+          combinator: "and",
+          rules: [{ id: "r_gen_1", questionId: "q_overall", operator: "lt", value: "3" }],
+        },
       }),
       question("q_aspects", "checkbox", "Aspek apa saja yang ingin kamu soroti?", {
         isRequired: false,

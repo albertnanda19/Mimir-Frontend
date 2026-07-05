@@ -48,6 +48,15 @@ export function ManualBuilderWorkspace() {
       ...source,
       id: `q_${crypto.randomUUID().slice(0, 8)}`,
       options: source.options ? [...source.options] : undefined,
+      logic: source.logic
+        ? {
+            ...source.logic,
+            rules: source.logic.rules.map((rule) => ({
+              ...rule,
+              id: `r_${crypto.randomUUID().slice(0, 8)}`,
+            })),
+          }
+        : undefined,
     };
     const questions = [...draft.questions];
     questions.splice(index + 1, 0, copy);
@@ -56,7 +65,15 @@ export function ManualBuilderWorkspace() {
   }
 
   function handleDelete(id: string) {
-    commit({ ...draft, questions: draft.questions.filter((question) => question.id !== id) });
+    const questions = draft.questions
+      .filter((question) => question.id !== id)
+      .map((question) => {
+        if (!question.logic) return question;
+        const rules = question.logic.rules.filter((rule) => rule.questionId !== id);
+        if (rules.length === question.logic.rules.length) return question;
+        return { ...question, logic: rules.length > 0 ? { ...question.logic, rules } : undefined };
+      });
+    commit({ ...draft, questions });
     if (selectedId === id) setSelectedId(null);
   }
 
@@ -121,7 +138,12 @@ export function ManualBuilderWorkspace() {
           onDelete={handleDelete}
           onAddClick={() => handleInsert("short_text", draft.questions.length)}
         />
-        <QuestionSettingsPanel question={selected} onUpdate={handleUpdate} onRetype={handleRetype} />
+        <QuestionSettingsPanel
+          question={selected}
+          questions={draft.questions}
+          onUpdate={handleUpdate}
+          onRetype={handleRetype}
+        />
       </div>
 
       {openDialog === "preview" && <FormPreviewModal draft={draft} onClose={() => setOpenDialog(null)} />}

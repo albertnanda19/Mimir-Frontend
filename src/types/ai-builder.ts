@@ -13,6 +13,28 @@ export type DraftQuestionType =
   | "file_upload"
   | "signature";
 
+export type LogicOperator =
+  | "gt"
+  | "gte"
+  | "lt"
+  | "lte"
+  | "eq"
+  | "selected"
+  | "not_selected"
+  | "filled";
+
+export interface LogicRule {
+  id: string;
+  questionId: string;
+  operator: LogicOperator;
+  value: string;
+}
+
+export interface QuestionLogic {
+  combinator: "and" | "or";
+  rules: LogicRule[];
+}
+
 export interface DraftQuestion {
   id: string;
   type: DraftQuestionType;
@@ -21,7 +43,7 @@ export interface DraftQuestion {
   isRequired: boolean;
   options?: string[];
   scaleHint?: string;
-  logic?: string;
+  logic?: QuestionLogic;
 }
 
 export interface FormDraft {

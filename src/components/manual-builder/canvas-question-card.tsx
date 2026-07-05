@@ -7,6 +7,7 @@ import { FieldInputPreview } from "@/components/manual-builder/field-input-previ
 
 interface CanvasQuestionCardProps {
   question: DraftQuestion;
+  logicText: string | null;
   index: number;
   total: number;
   isSelected: boolean;
@@ -21,6 +22,7 @@ interface CanvasQuestionCardProps {
 
 export function CanvasQuestionCard({
   question,
+  logicText,
   index,
   total,
   isSelected,
@@ -116,12 +118,12 @@ export function CanvasQuestionCard({
         <FieldInputPreview question={question} />
       </div>
 
-      {question.logic && (
+      {logicText && (
         <div className="ml-9 flex items-start gap-2 rounded-md bg-accent-subtle px-3 py-2">
           <GitBranch className="mt-0.5 size-3.5 shrink-0 text-accent-text" />
           <p className="text-xs leading-relaxed text-accent-text">
             <span className="font-semibold">Logika kondisional · </span>
-            {question.logic}
+            {logicText}
           </p>
         </div>
       )}

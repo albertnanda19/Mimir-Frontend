@@ -7,6 +7,7 @@ import { TYPE_ICONS } from "@/lib/field-types";
 
 interface QuestionPreviewCardProps {
   question: DraftQuestion;
+  logicText: string | null;
   index: number;
   total: number;
   isDragging: boolean;
@@ -17,6 +18,7 @@ interface QuestionPreviewCardProps {
 
 export function QuestionPreviewCard({
   question,
+  logicText,
   index,
   total,
   isDragging,
@@ -101,12 +103,12 @@ export function QuestionPreviewCard({
         </div>
       )}
 
-      {question.logic && (
+      {logicText && (
         <div className="ml-9 flex items-start gap-2 rounded-md bg-accent-subtle px-3 py-2">
           <GitBranch className="mt-0.5 size-3.5 shrink-0 text-accent-text" />
           <p className="text-xs leading-relaxed text-accent-text">
             <span className="font-semibold">Logika kondisional · </span>
-            {question.logic}
+            {logicText}
           </p>
         </div>
       )}

@@ -2,6 +2,7 @@
 
 import { GitBranch } from "@mynaui/icons-react";
 import type { FormDraft } from "@/types/ai-builder";
+import { formatLogic } from "@/lib/logic";
 import { Modal } from "@/components/ui/modal";
 import { FieldInputPreview } from "@/components/manual-builder/field-input-preview";
 
@@ -22,7 +23,9 @@ export function FormPreviewModal({ draft, onClose }: FormPreviewModalProps) {
         {draft.questions.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted">Belum ada pertanyaan untuk dipratinjau.</p>
         ) : (
-          draft.questions.map((question, index) => (
+          draft.questions.map((question, index) => {
+            const logicText = formatLogic(question.logic, draft.questions);
+            return (
             <div
               key={question.id}
               style={{ animationDelay: `${Math.min(index * 50, 350)}ms` }}
@@ -34,14 +37,15 @@ export function FormPreviewModal({ draft, onClose }: FormPreviewModalProps) {
                 {question.isRequired && <span className="ml-1 text-danger-text">*</span>}
               </p>
               <FieldInputPreview question={question} />
-              {question.logic && (
+              {logicText && (
                 <p className="flex items-center gap-1.5 text-xs text-accent-text">
                   <GitBranch className="size-3.5" />
-                  {question.logic}
+                  {logicText}
                 </p>
               )}
             </div>
-          ))
+            );
+          })
         )}
       </div>
     </Modal>

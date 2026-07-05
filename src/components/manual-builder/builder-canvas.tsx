@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Layout, Plus } from "@mynaui/icons-react";
 import type { DraftQuestionType, FormDraft } from "@/types/ai-builder";
+import { formatLogic } from "@/lib/logic";
 import { CanvasQuestionCard } from "@/components/manual-builder/canvas-question-card";
 
 interface BuilderCanvasProps {
@@ -138,6 +139,7 @@ export function BuilderCanvas({
                 {isDragActive && overSlot === index && <DropIndicator position="top" />}
                 <CanvasQuestionCard
                   question={question}
+                  logicText={formatLogic(question.logic, draft.questions)}
                   index={index}
                   total={total}
                   isSelected={selectedId === question.id}

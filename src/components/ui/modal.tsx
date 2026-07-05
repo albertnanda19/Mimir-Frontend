@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "@mynaui/icons-react";
 
 interface ModalProps {
@@ -23,7 +24,7 @@ export function Modal({ title, onClose, children, maxWidthClass = "max-w-xl" }: 
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
@@ -50,6 +51,7 @@ export function Modal({ title, onClose, children, maxWidthClass = "max-w-xl" }: 
         </header>
         <div className="scrollbar-slim flex-1 overflow-y-auto p-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import { Cog, GitBranch, Plus, X } from "@mynaui/icons-react";
-import type { DraftQuestion, DraftQuestionType } from "@/types/ai-builder";
+import { Cog, Plus, X } from "@mynaui/icons-react";
+import type { DraftQuestion, DraftQuestionType, QuestionLogic } from "@/types/ai-builder";
 import { CHOICE_TYPES, FIELD_GROUPS, TYPE_LABELS } from "@/lib/field-types";
 import { SelectField } from "@/components/ui/select-field";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { LogicBuilder } from "@/components/manual-builder/logic-builder";
 
 const TYPE_OPTIONS = FIELD_GROUPS.flatMap((group) =>
   group.types.map((type) => ({ value: type, label: TYPE_LABELS[type] })),
@@ -14,11 +15,17 @@ const SCALE_TYPES: DraftQuestionType[] = ["likert", "rating"];
 
 interface QuestionSettingsPanelProps {
   question: DraftQuestion | null;
+  questions: DraftQuestion[];
   onUpdate: (patch: Partial<DraftQuestion>) => void;
   onRetype: (type: DraftQuestionType) => void;
 }
 
-export function QuestionSettingsPanel({ question, onUpdate, onRetype }: QuestionSettingsPanelProps) {
+export function QuestionSettingsPanel({
+  question,
+  questions,
+  onUpdate,
+  onRetype,
+}: QuestionSettingsPanelProps) {
   return (
     <aside
       aria-label="Pengaturan pertanyaan"
@@ -122,22 +129,11 @@ export function QuestionSettingsPanel({ question, onUpdate, onRetype }: Question
             </label>
           )}
 
-          <div className="flex flex-col gap-1.5">
-            <span className="flex items-center gap-1.5 text-[13px] font-medium tracking-[-0.01em] text-muted">
-              <GitBranch className="size-3.5 text-accent-text" />
-              Logika kondisional
-            </span>
-            <textarea
-              rows={2}
-              value={question.logic ?? ""}
-              onChange={(event) => onUpdate({ logic: event.target.value || undefined })}
-              placeholder="Mis. Tampil hanya jika rating kurang dari 3"
-              className="scrollbar-slim w-full resize-none rounded-md border border-line bg-surface px-3 py-2.5 text-sm leading-snug text-ink outline-none transition-all duration-150 placeholder:text-faint hover:border-line-strong focus:border-brand focus:shadow-[0_0_0_3px_var(--brand-subtle)]"
-            />
-            <p className="text-xs leading-relaxed text-faint">
-              Tulis aturannya dalam bahasa biasa — penyusun aturan visual menyusul saat logic engine siap.
-            </p>
-          </div>
+          <LogicBuilder
+            question={question}
+            questions={questions}
+            onChange={(logic: QuestionLogic | undefined) => onUpdate({ logic })}
+          />
         </div>
       )}
     </aside>

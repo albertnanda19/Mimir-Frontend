@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle, Copy, GitBranch, Send } from "@mynaui/icons-react";
 import type { FormDraft } from "@/types/ai-builder";
+import { formatLogic } from "@/lib/logic";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +31,9 @@ export function PublishDialog({ draft, onClose }: PublishDialogProps) {
   const [isPublished, setIsPublished] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const link = `https://mimir.app/f/${toSlug(draft.title)}`;
-  const logicCount = draft.questions.filter((question) => question.logic).length;
+  const logicCount = draft.questions.filter((question) =>
+    formatLogic(question.logic, draft.questions),
+  ).length;
   const requiredCount = draft.questions.filter((question) => question.isRequired).length;
 
   async function handlePublish() {

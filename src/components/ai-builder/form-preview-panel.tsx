@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, GitBranch, Layout } from "@mynaui/icons-react";
 import type { FormDraft } from "@/types/ai-builder";
 import { saveDraft } from "@/lib/draft-store";
+import { formatLogic } from "@/lib/logic";
 import { QuestionPreviewCard } from "@/components/ai-builder/question-preview-card";
 
 interface FormPreviewPanelProps {
@@ -26,7 +27,8 @@ function DropIndicator({ position }: { position: "top" | "bottom" }) {
 export function FormPreviewPanel({ draft, isGenerating, onReorder }: FormPreviewPanelProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overSlot, setOverSlot] = useState<number | null>(null);
-  const logicCount = draft?.questions.filter((question) => question.logic).length ?? 0;
+  const logicCount =
+    draft?.questions.filter((question) => formatLogic(question.logic, draft.questions)).length ?? 0;
   const total = draft?.questions.length ?? 0;
 
   function resetDrag() {
@@ -121,6 +123,7 @@ export function FormPreviewPanel({ draft, isGenerating, onReorder }: FormPreview
                 {dragIndex !== null && overSlot === index && <DropIndicator position="top" />}
                 <QuestionPreviewCard
                   question={question}
+                  logicText={formatLogic(question.logic, draft.questions)}
                   index={index}
                   total={total}
                   isDragging={dragIndex === index}
