@@ -6,9 +6,14 @@ import { Send } from "@mynaui/icons-react";
 interface ChatComposerProps {
   isBusy: boolean;
   onSend: (prompt: string) => void;
+  placeholder?: string;
 }
 
-export function ChatComposer({ isBusy, onSend }: ChatComposerProps) {
+export function ChatComposer({
+  isBusy,
+  onSend,
+  placeholder = "Jelaskan form yang ingin kamu buat…",
+}: ChatComposerProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const canSend = value.trim().length > 0 && !isBusy;
@@ -44,7 +49,7 @@ export function ChatComposer({ isBusy, onSend }: ChatComposerProps) {
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder="Jelaskan form yang ingin kamu buat…"
+          placeholder={placeholder}
           aria-label="Instruksi untuk Mimir"
           className="max-h-40 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed text-ink outline-none placeholder:text-faint"
         />

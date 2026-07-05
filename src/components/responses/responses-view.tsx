@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -26,6 +27,14 @@ const STATUS_BADGE: Record<FormStatus, string> = {
   draft: "bg-accent-subtle text-accent-text",
   closed: "bg-overlay text-muted",
 };
+
+const MimirChat = dynamic(
+  () => import("@/components/tanya-mimir/mimir-chat").then((mod) => mod.MimirChat),
+  {
+    ssr: false,
+    loading: () => <div className="h-[72dvh] animate-pulse rounded-xl border border-line bg-surface" />,
+  },
+);
 
 const TABS = [
   { id: "table", label: "Tabel klasik", icon: Table },
@@ -167,21 +176,20 @@ export function ResponsesView({ formId }: { formId: string }) {
           ) : (
             <ResponsesTable questions={questions} rows={rows} />
           )
-        ) : (
-          <div className="flex flex-col items-center gap-4 rounded-xl border border-line bg-surface px-6 py-16 text-center shadow-[var(--elevation-1)] animate-enter">
+        ) : rows.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-line bg-surface px-6 py-16 text-center">
             <span className="flex size-12 items-center justify-center rounded-xl bg-accent-subtle text-accent-text">
               <Sparkles className="size-6" />
             </span>
             <div className="flex flex-col gap-1">
-              <p className="font-display text-lg font-semibold tracking-[-0.01em] text-ink">
-                Tanya Mimir segera hadir
-              </p>
-              <p className="max-w-md text-[13px] leading-relaxed text-muted">
-                Mengobrol langsung dengan data respons — minta grafik, ringkasan, sampai pembersihan data hanya
-                dengan bahasa sehari-hari.
+              <p className="text-sm font-medium text-ink">Belum ada data untuk dianalisis</p>
+              <p className="max-w-sm text-[13px] leading-relaxed text-muted">
+                Begitu respons pertama masuk, kamu bisa langsung mengobrol dengan datanya di sini.
               </p>
             </div>
           </div>
+        ) : (
+          <MimirChat data={data} />
         )}
       </main>
     </div>
