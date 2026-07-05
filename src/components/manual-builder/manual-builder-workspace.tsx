@@ -5,6 +5,8 @@ import { Eye, Send } from "@mynaui/icons-react";
 import type { DraftQuestion, DraftQuestionType, FormDraft } from "@/types/ai-builder";
 import { createQuestion, retypeQuestion, EMPTY_DRAFT } from "@/lib/field-types";
 import { loadDraft, saveDraft } from "@/lib/draft-store";
+import { useBuilderChat } from "@/hooks/use-builder-chat";
+import { BuilderChatWidget } from "@/components/manual-builder/builder-chat-widget";
 import { FieldPalette } from "@/components/manual-builder/field-palette";
 import { BuilderCanvas } from "@/components/manual-builder/builder-canvas";
 import { QuestionSettingsPanel } from "@/components/manual-builder/question-settings-panel";
@@ -23,6 +25,11 @@ export function ManualBuilderWorkspace() {
     setDraft(next);
     saveDraft(next);
   }
+
+  const chat = useBuilderChat(draft.questions.length > 0 ? draft : null, (next) => {
+    commit(next);
+    setSelectedId(null);
+  });
 
   function handleInsert(type: DraftQuestionType, at: number) {
     const question = createQuestion(type);
@@ -148,6 +155,13 @@ export function ManualBuilderWorkspace() {
 
       {openDialog === "preview" && <FormPreviewModal draft={draft} onClose={() => setOpenDialog(null)} />}
       {openDialog === "publish" && <PublishDialog draft={draft} onClose={() => setOpenDialog(null)} />}
+
+      <BuilderChatWidget
+        messages={chat.messages}
+        isThinking={chat.isThinking}
+        isBusy={chat.isBusy}
+        onSend={chat.send}
+      />
     </div>
   );
 }

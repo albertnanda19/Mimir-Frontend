@@ -23,7 +23,11 @@ export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
     <div className="flex min-h-dvh flex-col bg-subtle lg:h-dvh">
       <AppNavbar user={user} />
 
-      <main className="mx-auto flex w-full max-w-[90rem] flex-1 flex-col px-4 pb-4 pt-5 sm:px-6 lg:min-h-0">
+      <main
+        className={`mx-auto flex w-full flex-1 flex-col px-4 pb-4 pt-5 sm:px-6 lg:min-h-0 ${
+          mode === "manual" ? "max-w-none" : "max-w-[90rem]"
+        }`}
+      >
         {!user ? (
           <div className="flex flex-1 flex-col gap-4">
             <div className="h-9 w-64 animate-pulse rounded-md bg-overlay" />
