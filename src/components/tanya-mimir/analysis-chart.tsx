@@ -9,7 +9,12 @@ import { useIsDarkTheme } from "@/hooks/use-is-dark-theme";
 const CATEGORICAL_LIGHT = ["#2B6ACC", "#CC8010", "#1A8A4A", "#6D40C4", "#0C7B6B", "#B02020"];
 const CATEGORICAL_DARK = ["#4A87E0", "#E0A030", "#22A85C", "#8A63D2", "#17A08C", "#D03030"];
 
-export function AnalysisChartCard({ chart }: { chart: AnalysisChart }) {
+interface AnalysisChartCardProps {
+  chart: AnalysisChart;
+  onPointClick: (pointIndex: number) => void;
+}
+
+export function AnalysisChartCard({ chart, onPointClick }: AnalysisChartCardProps) {
   const isDark = useIsDarkTheme();
   const theme = getChartTheme(isDark);
   const palette = isDark ? CATEGORICAL_DARK : CATEGORICAL_LIGHT;
@@ -84,11 +89,16 @@ export function AnalysisChartCard({ chart }: { chart: AnalysisChart }) {
 
   return (
     <figure className="overflow-hidden rounded-lg border border-line bg-surface shadow-[var(--elevation-1)] animate-enter">
-      <figcaption className="border-b border-line-subtle px-4 py-2.5 text-[13px] font-medium text-ink">
-        {chart.title}
+      <figcaption className="flex items-center justify-between gap-3 border-b border-line-subtle px-4 py-2.5">
+        <span className="text-[13px] font-medium text-ink">{chart.title}</span>
+        <span className="hidden shrink-0 text-[11px] text-faint sm:block">Klik grafik untuk data mentah</span>
       </figcaption>
       <div className="p-2">
-        <EChart option={option} style={{ height: 240 }} />
+        <EChart
+          option={option}
+          style={{ height: 240 }}
+          onEvents={{ click: (params) => onPointClick(params.dataIndex) }}
+        />
       </div>
     </figure>
   );

@@ -17,17 +17,25 @@ export function StatsGrid({ stats }: { stats: AnalysisStat[] }) {
   );
 }
 
-export function ClusterList({ clusters }: { clusters: AnalysisCluster[] }) {
+export function ClusterList({
+  clusters,
+  onClusterClick,
+}: {
+  clusters: AnalysisCluster[];
+  onClusterClick: (cluster: AnalysisCluster) => void;
+}) {
   const max = Math.max(...clusters.map((cluster) => cluster.count), 1);
   return (
     <div className="flex flex-col gap-2 animate-enter">
       {clusters.map((cluster, index) => (
-        <div
+        <button
           key={cluster.name}
+          type="button"
+          onClick={() => onClusterClick(cluster)}
           style={{ animationDelay: `${index * 50}ms` }}
-          className="flex flex-col gap-1.5 rounded-lg border border-line bg-surface p-3 shadow-[var(--elevation-1)] animate-enter"
+          className="flex cursor-pointer flex-col gap-1.5 rounded-lg border border-line bg-surface p-3 text-left shadow-[var(--elevation-1)] transition-all duration-150 animate-enter hover:-translate-y-0.5 hover:border-brand hover:shadow-[var(--elevation-2)] active:translate-y-0"
         >
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex w-full items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink">
               <Tag className="size-3.5 text-brand" />
               {cluster.name}
@@ -36,7 +44,7 @@ export function ClusterList({ clusters }: { clusters: AnalysisCluster[] }) {
               {cluster.count}
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-overlay">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-overlay">
             <div
               className="h-full rounded-full bg-brand transition-[width] duration-500 ease-[var(--ease-enter)]"
               style={{ width: `${Math.round((cluster.count / max) * 100)}%` }}
@@ -47,13 +55,20 @@ export function ClusterList({ clusters }: { clusters: AnalysisCluster[] }) {
               {cluster.samples.map((sample) => `“${sample}”`).join(" · ")}
             </p>
           )}
-        </div>
+          <span className="text-[11px] text-faint">Klik untuk lihat data mentahnya</span>
+        </button>
       ))}
     </div>
   );
 }
 
-export function CleanupCard({ cleanup }: { cleanup: CleanupProposal }) {
+export function CleanupCard({
+  cleanup,
+  onInspect,
+}: {
+  cleanup: CleanupProposal;
+  onInspect: () => void;
+}) {
   const [stage, setStage] = useState<"idle" | "working" | "done">("idle");
 
   async function handleApply() {
@@ -80,7 +95,7 @@ export function CleanupCard({ cleanup }: { cleanup: CleanupProposal }) {
         </div>
       </div>
       {stage !== "done" && (
-        <div className="flex items-center gap-2 pl-12">
+        <div className="flex flex-wrap items-center gap-2 pl-12">
           <button
             type="button"
             disabled={stage === "working"}
@@ -88,6 +103,13 @@ export function CleanupCard({ cleanup }: { cleanup: CleanupProposal }) {
             className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md bg-danger px-3.5 text-[13px] font-medium text-white shadow-[var(--elevation-1)] transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {stage === "working" ? "Membersihkan…" : `Hapus ${cleanup.count} respons`}
+          </button>
+          <button
+            type="button"
+            onClick={onInspect}
+            className="inline-flex h-9 cursor-pointer items-center rounded-md border border-line bg-surface px-3.5 text-[13px] font-medium text-muted transition-all duration-150 hover:border-line-strong hover:text-ink active:scale-[0.98]"
+          >
+            Periksa datanya dulu
           </button>
           <span className="text-xs text-faint">Perlu konfirmasimu dulu</span>
         </div>

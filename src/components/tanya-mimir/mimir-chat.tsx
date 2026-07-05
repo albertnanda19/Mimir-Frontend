@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { GitBranch, Sparkles } from "@mynaui/icons-react";
 import type { FormResponses } from "@/lib/responses-data";
-import type { AnalysisMessage } from "@/types/tanya-mimir";
+import type { AnalysisChart, AnalysisMessage } from "@/types/tanya-mimir";
 import { analyzeData, ANALYSIS_PROMPTS } from "@/lib/tanya-mimir-dummy";
 import { ChatComposer } from "@/components/ai-builder/chat-composer";
 import { AnalysisChartCard } from "@/components/tanya-mimir/analysis-chart";
 import { CleanupCard, ClusterList, StatsGrid } from "@/components/tanya-mimir/analysis-attachments";
+import { RawDataModal } from "@/components/tanya-mimir/raw-data-modal";
 
 function MimirAvatar() {
   return (
@@ -21,9 +22,18 @@ export function MimirChat({ data }: { data: FormResponses }) {
   const [messages, setMessages] = useState<AnalysisMessage[]>([]);
   const [isThinking, setIsThinking] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [drill, setDrill] = useState<{ title: string; rowIds: string[] } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const streamRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isBusy = isThinking || isStreaming;
+
+  const rowMap = new Map(data.rows.map((row) => [row.id, row]));
+
+  function handleChartClick(chart: AnalysisChart, pointIndex: number) {
+    const point = chart.points[pointIndex];
+    if (!point || point.rowIds.length === 0) return;
+    setDrill({ title: `${chart.title} — ${point.label}`, rowIds: point.rowIds });
+  }
 
   useEffect(
     () => () => {
@@ -141,10 +151,32 @@ export function MimirChat({ data }: { data: FormResponses }) {
                     <p className="w-fit whitespace-pre-line rounded-2xl rounded-tl-md border border-line-subtle bg-subtle px-4 py-2.5 text-sm leading-relaxed text-ink">
                       {message.content}
                     </p>
-                    {message.chart && <AnalysisChartCard chart={message.chart} />}
+                    {message.chart && (
+                      <AnalysisChartCard
+                        chart={message.chart}
+                        onPointClick={(pointIndex) => handleChartClick(message.chart!, pointIndex)}
+                      />
+                    )}
                     {message.stats && <StatsGrid stats={message.stats} />}
-                    {message.clusters && <ClusterList clusters={message.clusters} />}
-                    {message.cleanup && <CleanupCard cleanup={message.cleanup} />}
+                    {message.clusters && (
+                      <ClusterList
+                        clusters={message.clusters}
+                        onClusterClick={(cluster) =>
+                          setDrill({ title: `Kategori — ${cluster.name}`, rowIds: cluster.rowIds })
+                        }
+                      />
+                    )}
+                    {message.cleanup && (
+                      <CleanupCard
+                        cleanup={message.cleanup}
+                        onInspect={() =>
+                          setDrill({
+                            title: "Respons terindikasi spam",
+                            rowIds: message.cleanup!.rowIds,
+                          })
+                        }
+                      />
+                    )}
                   </div>
                 </div>
               ),
@@ -164,6 +196,15 @@ export function MimirChat({ data }: { data: FormResponses }) {
       </div>
 
       <ChatComposer isBusy={isBusy} onSend={handleSend} placeholder="Tanyakan apa saja tentang datamu…" />
+
+      {drill && (
+        <RawDataModal
+          title={drill.title}
+          rows={drill.rowIds.flatMap((id) => rowMap.get(id) ?? [])}
+          questions={data.questions}
+          onClose={() => setDrill(null)}
+        />
+      )}
     </section>
   );
 }

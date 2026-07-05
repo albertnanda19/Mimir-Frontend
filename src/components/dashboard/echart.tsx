@@ -10,13 +10,22 @@ import type { EChartsOption } from "echarts";
 
 echarts.use([LineChart, BarChart, PieChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
-export function EChart({ option, style }: { option: EChartsOption; style?: CSSProperties }) {
+export function EChart({
+  option,
+  style,
+  onEvents,
+}: {
+  option: EChartsOption;
+  style?: CSSProperties;
+  onEvents?: Record<string, (params: { dataIndex: number }) => void>;
+}) {
   return (
     <ReactEChartsCore
       echarts={echarts}
       option={option}
       notMerge
       lazyUpdate
+      onEvents={onEvents}
       style={{ height: 280, width: "100%", ...style }}
     />
   );

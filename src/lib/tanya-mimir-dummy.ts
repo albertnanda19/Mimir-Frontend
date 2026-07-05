@@ -26,52 +26,64 @@ function findQuestion(
   return questions.find((question) => types.includes(question.type));
 }
 
-function countBy(rows: ResponseRow[], questionId: string): Map<string, number> {
-  const counts = new Map<string, number>();
+function groupBy(rows: ResponseRow[], questionId: string): Map<string, string[]> {
+  const groups = new Map<string, string[]>();
   for (const row of rows) {
     const answer = row.answers[questionId];
     if (!answer) continue;
-    counts.set(answer, (counts.get(answer) ?? 0) + 1);
+    const bucket = groups.get(answer);
+    if (bucket) {
+      bucket.push(row.id);
+    } else {
+      groups.set(answer, [row.id]);
+    }
   }
-  return counts;
+  return groups;
 }
 
 function ratingChart(question: DraftQuestion, rows: ResponseRow[]): AnalysisChart {
-  const counts = countBy(rows, question.id);
+  const groups = groupBy(rows, question.id);
   return {
     kind: "bar",
     title: `Distribusi jawaban — ${question.label}`,
-    points: ["1", "2", "3", "4", "5"].map((step) => ({
-      label: `Skor ${step}`,
-      value: counts.get(step) ?? 0,
-    })),
+    points: ["1", "2", "3", "4", "5"].map((step) => {
+      const rowIds = groups.get(step) ?? [];
+      return { label: `Skor ${step}`, value: rowIds.length, rowIds };
+    }),
   };
 }
 
 function choiceChart(question: DraftQuestion, rows: ResponseRow[]): AnalysisChart {
-  const counts = countBy(rows, question.id);
+  const options = question.options ?? [];
   return {
     kind: "pie",
     title: `Sebaran pilihan — ${question.label}`,
-    points: (question.options ?? [...counts.keys()]).map((option) => ({
-      label: option,
-      value: counts.get(option) ?? 0,
-    })),
+    points: options.map((option) => {
+      const rowIds = rows
+        .filter((row) => (row.answers[question.id] ?? "").split(", ").includes(option))
+        .map((row) => row.id);
+      return { label: option, value: rowIds.length, rowIds };
+    }),
   };
 }
 
 function trendChart(rows: ResponseRow[]): AnalysisChart {
-  const byDay = new Map<string, number>();
+  const byDay = new Map<string, string[]>();
   const sorted = [...rows].sort((a, b) => a.submittedAtMs - b.submittedAtMs);
   for (const row of sorted) {
     const date = new Date(row.submittedAtMs);
     const key = `${date.getDate()} ${MONTHS_ID[date.getMonth()]}`;
-    byDay.set(key, (byDay.get(key) ?? 0) + 1);
+    const bucket = byDay.get(key);
+    if (bucket) {
+      bucket.push(row.id);
+    } else {
+      byDay.set(key, [row.id]);
+    }
   }
   return {
     kind: "line",
     title: "Respons masuk per hari (30 hari terakhir)",
-    points: [...byDay.entries()].map(([label, value]) => ({ label, value })),
+    points: [...byDay.entries()].map(([label, rowIds]) => ({ label, value: rowIds.length, rowIds })),
   };
 }
 
@@ -87,20 +99,34 @@ function clusterFeedback(questions: DraftQuestion[], rows: ResponseRow[]): Analy
   const paragraphIds = questions
     .filter((question) => question.type === "paragraph")
     .map((question) => question.id);
-  const texts: string[] = [];
+  const entries: { rowId: string; text: string }[] = [];
   for (const row of rows) {
     for (const id of paragraphIds) {
       const answer = row.answers[id];
-      if (answer) texts.push(answer);
+      if (answer) entries.push({ rowId: row.id, text: answer });
     }
   }
+  const matchedRowIds = new Set<string>();
   const clusters = CLUSTER_RULES.map(({ name, keywords }) => {
-    const matched = texts.filter((text) => keywords.some((keyword) => text.toLowerCase().includes(keyword)));
-    return { name, count: matched.length, samples: [...new Set(matched)].slice(0, 2) };
+    const matched = entries.filter(({ text }) =>
+      keywords.some((keyword) => text.toLowerCase().includes(keyword)),
+    );
+    matched.forEach(({ rowId }) => matchedRowIds.add(rowId));
+    return {
+      name,
+      count: matched.length,
+      samples: [...new Set(matched.map(({ text }) => text))].slice(0, 2),
+      rowIds: [...new Set(matched.map(({ rowId }) => rowId))],
+    };
   }).filter((cluster) => cluster.count > 0);
-  const matchedTotal = clusters.reduce((sum, cluster) => sum + cluster.count, 0);
-  if (texts.length - matchedTotal > 0) {
-    clusters.push({ name: "Lainnya", count: texts.length - matchedTotal, samples: [] });
+  const rest = entries.filter(({ rowId }) => !matchedRowIds.has(rowId));
+  if (rest.length > 0) {
+    clusters.push({
+      name: "Lainnya",
+      count: rest.length,
+      samples: [],
+      rowIds: [...new Set(rest.map(({ rowId }) => rowId))],
+    });
   }
   return clusters.sort((a, b) => b.count - a.count);
 }
@@ -142,12 +168,13 @@ export async function analyzeData(prompt: string, data: FormResponses): Promise<
   const choiceQuestion = findQuestion(questions, ["multiple_choice", "dropdown", "checkbox"]);
 
   if (/(spam|bersih|bot|duplikat|hapus)/.test(lower)) {
-    const suspect = rows.filter((row) => row.durationSec < 40).length;
+    const suspects = rows.filter((row) => row.durationSec < 40);
     return {
-      reply: `Aku memeriksa durasi pengisian seluruh respons. Ada ${suspect} respons yang diselesaikan kurang dari 40 detik — terlalu cepat untuk form sepanjang ini, jadi kuat dugaan asal isi atau bot. Aku sudah siapkan usulan pembersihannya di bawah; data baru benar-benar dihapus setelah kamu konfirmasi.`,
+      reply: `Aku memeriksa durasi pengisian seluruh respons. Ada ${suspects.length} respons yang diselesaikan kurang dari 40 detik — terlalu cepat untuk form sepanjang ini, jadi kuat dugaan asal isi atau bot. Aku sudah siapkan usulan pembersihannya di bawah; data baru benar-benar dihapus setelah kamu konfirmasi.`,
       cleanup: {
         description: "Hapus respons dengan durasi pengisian di bawah 40 detik",
-        count: suspect,
+        count: suspects.length,
+        rowIds: suspects.map((row) => row.id),
       },
     };
   }
@@ -177,8 +204,8 @@ export async function analyzeData(prompt: string, data: FormResponses): Promise<
   }
 
   if (/(grafik|chart|distribusi|rating|skor|bar)/.test(lower) && scaleQuestion) {
-    const counts = countBy(rows, scaleQuestion.id);
-    const low = (counts.get("1") ?? 0) + (counts.get("2") ?? 0);
+    const groups = groupBy(rows, scaleQuestion.id);
+    const low = (groups.get("1")?.length ?? 0) + (groups.get("2")?.length ?? 0);
     return {
       reply: `Ini distribusi skor untuk “${scaleQuestion.label}”. Mayoritas responden memberi skor 3 ke atas; ${low} respons memberi skor rendah — coba minta aku mengelompokkan alasan mereka.`,
       chart: ratingChart(scaleQuestion, rows),
