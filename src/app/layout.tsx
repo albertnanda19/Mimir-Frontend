@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${outfit.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${outfit.variable} ${geistSans.variable} ${geistMono.variable} h-full`}
       suppressHydrationWarning
     >
       <head>

@@ -2,14 +2,13 @@
 
 import { useActionState, useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { User, Mail, Logout, ShieldCheck } from "@mynaui/icons-react";
+import { User, Mail, ShieldCheck } from "@mynaui/icons-react";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { FormAlert } from "@/components/auth/form-alert";
-import { MimirLogo } from "@/components/brand/mimir-logo";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { getSession, getSessionSnapshot, subscribeSession, updateProfile, signOut } from "@/lib/auth-dummy";
+import { AppNavbar } from "@/components/layout/app-navbar";
+import { getSession, getSessionSnapshot, subscribeSession, updateProfile } from "@/lib/auth-dummy";
 
 interface SaveState {
   ok: boolean;
@@ -38,22 +37,9 @@ export function ProfileView() {
     { ok: false, error: null },
   );
 
-  function handleSignOut() {
-    signOut();
-    router.replace("/login");
-  }
-
   return (
     <div className="min-h-dvh">
-      <header className="flex h-14 items-center justify-between border-b border-line-subtle bg-surface/80 px-5 backdrop-blur sm:px-8">
-        <MimirLogo />
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Button variant="ghost" onClick={handleSignOut} leadingIcon={<Logout className="size-4" />} className="w-auto">
-            Keluar
-          </Button>
-        </div>
-      </header>
+      <AppNavbar user={user} />
 
       <main className="mx-auto w-full max-w-[42rem] px-5 py-10 sm:px-8">
         {!user ? (

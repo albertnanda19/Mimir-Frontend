@@ -198,15 +198,6 @@
   }
 }
 
-@keyframes drift {
-  from {
-    transform: translate(0, 0);
-  }
-  to {
-    transform: translate(-40px, -40px);
-  }
-}
-
 @utility animate-enter {
   animation: fade-in-up 400ms var(--ease-enter) both;
 }
@@ -219,8 +210,7 @@ body {
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-weight: 500;
 }
 
 @media (prefers-reduced-motion: reduce) {

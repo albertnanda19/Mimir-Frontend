@@ -23,7 +23,7 @@ export function ThemeToggle() {
       type="button"
       onClick={handleToggle}
       aria-label={theme === "dark" ? "Mode terang" : "Mode gelap"}
-      className="flex size-9 cursor-pointer items-center justify-center rounded-md border border-line bg-surface text-muted transition-all duration-150 hover:border-line-strong hover:text-ink active:scale-95"
+      className="flex size-9 cursor-pointer items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-150 hover:border-line-strong hover:bg-overlay hover:text-ink active:scale-90"
     >
       {theme === "dark" ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
     </button>
