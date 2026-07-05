@@ -133,7 +133,7 @@ export function BuilderCanvas({
             {draft.questions.map((question, index) => (
               <div
                 key={question.id}
-                className="relative"
+                className="relative [contain-intrinsic-size:auto_180px] [content-visibility:auto]"
                 onDragOver={(event) => handleDragOver(event, index)}
                 onDrop={handleDrop}
               >

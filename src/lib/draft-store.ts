@@ -20,8 +20,20 @@ function currentDraftId(): string {
   return id;
 }
 
-function archiveDraft(draft: FormDraft): void {
-  if (draft.questions.length === 0) return;
+let archiveTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingArchive: FormDraft | null = null;
+
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", () => {
+    if (!pendingArchive) return;
+    try {
+      writeArchive(pendingArchive);
+      pendingArchive = null;
+    } catch {}
+  });
+}
+
+function writeArchive(draft: FormDraft): void {
   const raw = localStorage.getItem(ARCHIVE_KEY);
   const list: ArchivedDraft[] = raw ? (JSON.parse(raw) as ArchivedDraft[]) : [];
   const entry: ArchivedDraft = { id: currentDraftId(), updatedAt: new Date().toISOString(), draft };
@@ -32,6 +44,19 @@ function archiveDraft(draft: FormDraft): void {
     list[index] = entry;
   }
   localStorage.setItem(ARCHIVE_KEY, JSON.stringify(list.slice(0, ARCHIVE_LIMIT)));
+}
+
+function archiveDraft(draft: FormDraft): void {
+  if (draft.questions.length === 0) return;
+  pendingArchive = draft;
+  if (archiveTimer) clearTimeout(archiveTimer);
+  archiveTimer = setTimeout(() => {
+    archiveTimer = null;
+    try {
+      writeArchive(draft);
+      pendingArchive = null;
+    } catch {}
+  }, 500);
 }
 
 export function loadArchivedDrafts(): ArchivedDraft[] {
