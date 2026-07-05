@@ -27,23 +27,37 @@ export interface DailyPoint {
   count: number;
 }
 
-function buildSeries(days: number): DailyPoint[] {
+function buildFormSeries(days: number, seed: number, scale: number): DailyPoint[] {
   const points: DailyPoint[] = [];
   for (let offset = days - 1; offset >= 0; offset -= 1) {
     const date = new Date(TODAY);
     date.setDate(TODAY.getDate() - offset);
-    const wave = 34 + Math.round(16 * Math.sin(offset / 2.6)) + Math.round(9 * Math.cos(offset / 5));
-    const weekend = date.getDay() === 0 || date.getDay() === 6 ? 12 : 0;
-    const trend = Math.round((days - offset) / 4);
+    const wave = 1 + 0.5 * Math.sin(offset / 2.6 + seed) + 0.3 * Math.cos(offset / 5 + seed * 2);
+    const weekend = date.getDay() === 0 || date.getDay() === 6 ? 0.35 : 0;
+    const trend = (days - offset) / (days * 3);
     points.push({
       label: `${date.getDate()} ${MONTHS_ID[date.getMonth()]}`,
-      count: Math.max(4, wave + weekend + trend),
+      count: Math.max(0, Math.round(scale * (wave + weekend + trend))),
     });
   }
   return points;
 }
 
-export const RESPONSES_SERIES = buildSeries(30);
+const ACTIVE_FORMS = DUMMY_FORMS.filter((form) => form.responses > 0);
+
+export const RESPONSES_BY_FORM: Record<string, DailyPoint[]> = Object.fromEntries(
+  ACTIVE_FORMS.map((form, index) => [form.id, buildFormSeries(30, index * 1.7, form.responses / 90)]),
+);
+
+export const RESPONSES_SERIES: DailyPoint[] = Object.values(RESPONSES_BY_FORM)[0].map((point, dayIndex) => ({
+  label: point.label,
+  count: Object.values(RESPONSES_BY_FORM).reduce((sum, series) => sum + series[dayIndex].count, 0),
+}));
+
+export const FORM_FILTER_OPTIONS = [
+  { id: "all", title: "Semua form" },
+  ...ACTIVE_FORMS.map((form) => ({ id: form.id, title: form.title })),
+];
 
 export interface StatusSlice {
   status: FormStatus;

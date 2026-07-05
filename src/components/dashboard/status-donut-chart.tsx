@@ -1,7 +1,9 @@
 "use client";
 
 import type { EChartsOption } from "echarts";
+import { ChartPie } from "@mynaui/icons-react";
 import { EChart } from "@/components/dashboard/echart";
+import { ChartCard } from "@/components/dashboard/chart-card";
 import { useIsDarkTheme } from "@/hooks/use-is-dark-theme";
 import { getChartTheme } from "@/lib/chart-theme";
 import { STATUS_BREAKDOWN, DASHBOARD_STATS } from "@/lib/dashboard-data";
@@ -40,11 +42,7 @@ export function StatusDonutChart() {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-5 shadow-[var(--elevation-1)]">
-      <div className="flex flex-col gap-0.5">
-        <h3 className="text-[15px] font-medium text-ink">Status form</h3>
-        <p className="text-[13px] text-muted">Distribusi seluruh form</p>
-      </div>
+    <ChartCard icon={<ChartPie />} title="Status form" subtitle="Distribusi seluruh form">
       <div className="relative">
         <EChart option={option} style={{ height: 200 }} />
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
@@ -52,7 +50,7 @@ export function StatusDonutChart() {
           <span className="text-xs text-muted">total form</span>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="mt-4 flex flex-col gap-2 rounded-lg bg-subtle p-3">
         {STATUS_BREAKDOWN.map((slice) => (
           <div key={slice.status} className="flex items-center gap-2 text-[13px]">
             <span className="size-2.5 rounded-full" style={{ background: theme.statusColors[slice.status] }} />
@@ -61,6 +59,6 @@ export function StatusDonutChart() {
           </div>
         ))}
       </div>
-    </div>
+    </ChartCard>
   );
 }

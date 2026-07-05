@@ -470,6 +470,7 @@ Hanya jika profiling (React DevTools — Components tab → Profiler) membuktika
 - [ ] Shadow pakai `var(--elevation-*)`?
 - [ ] Dark mode `[data-theme="dark"]` didukung?
 - [ ] Tidak ada file CSS custom? (hanya Tailwind utility + CSS variables)
+- [ ] Tidak ada native browser UI? (`<select>` bawaan, `alert()`, `confirm()`, `prompt()` → wajib komponen Yggdrasil)
 
 ### Metrics
 - [ ] Bundle size per page <100KB gzipped?
@@ -489,6 +490,7 @@ tambahan spesifik Next.js/React yang TIDAK universal:
 
 | Rule | Detail |
 |------|--------|
+| **NO native browser UI** | WAJIB — jangan pernah pakai `<select>` bawaan browser, `alert()`, `confirm()`, `prompt()`, atau `<dialog>` polos. Gunakan komponen Yggdrasil sendiri: dropdown → `components/ui/select-field.tsx` (popup animasi + search), notifikasi/konfirmasi → komponen alert/dialog custom sesuai DESIGN.md |
 | **NO barrel imports** | Import directly from file, not `index.ts` re-exports |
 | **NO useEffect for derived data** | Compute inline, use `use()` for promises (React 19) |
 | **`"use client"` di file terpisah** | Jangan gabung server & client logic di file yang sama |

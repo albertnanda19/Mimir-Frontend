@@ -32,8 +32,8 @@ export function FormCard({ form, onDuplicate, onDelete }: FormCardProps) {
   }, [isMenuOpen]);
 
   return (
-    <div className="group flex flex-col rounded-lg border border-line bg-surface p-5 shadow-[var(--elevation-1)] transition-all duration-200 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--elevation-2)]">
-      <div className="flex items-start justify-between gap-2">
+    <div className="group flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-[var(--elevation-1)] transition-all duration-200 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--elevation-2)]">
+      <div className="flex items-start justify-between gap-2 p-5 pb-0">
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[form.status]}`}
         >
@@ -91,13 +91,13 @@ export function FormCard({ form, onDuplicate, onDelete }: FormCardProps) {
         </div>
       </div>
 
-      <Link href={`/forms/${form.id}`} className="mt-3">
+      <Link href={`/forms/${form.id}`} className="mt-3 px-5">
         <h4 className="line-clamp-2 font-display text-[17px] font-medium leading-snug text-ink transition-colors group-hover:text-brand-text">
           {form.title}
         </h4>
       </Link>
 
-      <div className="mt-4 flex items-center gap-4 text-[13px] text-muted">
+      <div className="mt-4 flex items-center gap-4 px-5 pb-5 text-[13px] text-muted">
         <span className="inline-flex items-center gap-1.5">
           <InboxCheck className="size-4 text-faint" />
           {form.responses.toLocaleString("id-ID")} respons
@@ -108,7 +108,7 @@ export function FormCard({ form, onDuplicate, onDelete }: FormCardProps) {
         </span>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-line-subtle pt-3 text-xs text-faint">
+      <div className="mt-auto flex items-center justify-between border-t border-line-subtle bg-subtle px-5 py-3 text-xs text-faint">
         <span>Dibuat {form.createdAt}</span>
         <span>{form.lastResponseAt ? `Respons ${form.lastResponseAt}` : "Belum ada respons"}</span>
       </div>

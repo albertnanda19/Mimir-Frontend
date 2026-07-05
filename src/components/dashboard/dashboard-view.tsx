@@ -2,14 +2,29 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { StatCards } from "@/components/dashboard/stat-cards";
-import { ResponsesAreaChart } from "@/components/dashboard/responses-area-chart";
-import { StatusDonutChart } from "@/components/dashboard/status-donut-chart";
-import { TopFormsChart } from "@/components/dashboard/top-forms-chart";
 import { FormsPanel } from "@/components/dashboard/forms-panel";
 import { CreateFormMenu } from "@/components/dashboard/create-form-menu";
 import { getSession, getSessionSnapshot, subscribeSession } from "@/lib/auth-dummy";
+
+function ChartSkeleton({ className }: { className: string }) {
+  return <div className={`animate-pulse rounded-xl border border-line bg-surface ${className}`} />;
+}
+
+const ResponsesAreaChart = dynamic(
+  () => import("@/components/dashboard/responses-area-chart").then((mod) => mod.ResponsesAreaChart),
+  { ssr: false, loading: () => <ChartSkeleton className="h-[369px]" /> },
+);
+const StatusDonutChart = dynamic(
+  () => import("@/components/dashboard/status-donut-chart").then((mod) => mod.StatusDonutChart),
+  { ssr: false, loading: () => <ChartSkeleton className="h-full min-h-[369px]" /> },
+);
+const TopFormsChart = dynamic(
+  () => import("@/components/dashboard/top-forms-chart").then((mod) => mod.TopFormsChart),
+  { ssr: false, loading: () => <ChartSkeleton className="h-[349px]" /> },
+);
 
 export function DashboardView() {
   const router = useRouter();
@@ -22,7 +37,7 @@ export function DashboardView() {
   }, [router]);
 
   return (
-    <div className="min-h-dvh bg-base">
+    <div className="min-h-dvh bg-subtle">
       <AppNavbar user={user} />
 
       <main className="mx-auto flex w-full max-w-[80rem] flex-col gap-8 px-4 py-8 sm:px-8">

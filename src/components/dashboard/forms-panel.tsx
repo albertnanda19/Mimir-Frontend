@@ -53,7 +53,7 @@ export function FormsPanel() {
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-1 rounded-full border border-line bg-subtle p-1">
+        <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1 shadow-[var(--elevation-1)]">
           {TABS.map((tab) => {
             const count = tab.value === "all" ? forms.length : forms.filter((form) => form.status === tab.value).length;
             return (
@@ -79,7 +79,7 @@ export function FormsPanel() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Cari form…"
-            className="h-10 w-full rounded-md border border-transparent bg-subtle pl-9 pr-3 text-sm text-ink outline-none transition-all duration-150 placeholder:text-faint hover:border-line focus:border-brand focus:bg-surface focus:shadow-[0_0_0_3px_var(--brand-subtle)]"
+            className="h-10 w-full rounded-md border border-line bg-surface pl-9 pr-3 text-sm text-ink shadow-[var(--elevation-1)] outline-none transition-all duration-150 placeholder:text-faint hover:border-line-strong focus:border-brand focus:shadow-[0_0_0_3px_var(--brand-subtle)]"
           />
         </div>
       </div>

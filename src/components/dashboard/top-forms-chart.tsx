@@ -1,7 +1,9 @@
 "use client";
 
 import type { EChartsOption } from "echarts";
+import { ChartBar } from "@mynaui/icons-react";
 import { EChart } from "@/components/dashboard/echart";
+import { ChartCard } from "@/components/dashboard/chart-card";
 import { useIsDarkTheme } from "@/hooks/use-is-dark-theme";
 import { getChartTheme } from "@/lib/chart-theme";
 import { TOP_FORMS } from "@/lib/dashboard-data";
@@ -59,12 +61,8 @@ export function TopFormsChart() {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-5 shadow-[var(--elevation-1)]">
-      <div className="flex flex-col gap-0.5">
-        <h3 className="text-[15px] font-medium text-ink">Form paling ramai</h3>
-        <p className="text-[13px] text-muted">Peringkat berdasarkan jumlah respons</p>
-      </div>
+    <ChartCard icon={<ChartBar />} title="Form paling ramai" subtitle="Peringkat berdasarkan jumlah respons">
       <EChart option={option} style={{ height: 240 }} />
-    </div>
+    </ChartCard>
   );
 }

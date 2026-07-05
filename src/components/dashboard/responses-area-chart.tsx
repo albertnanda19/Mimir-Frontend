@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import type { EChartsOption } from "echarts";
+import { ChartLine } from "@mynaui/icons-react";
 import { EChart } from "@/components/dashboard/echart";
+import { ChartCard } from "@/components/dashboard/chart-card";
+import { SelectField } from "@/components/ui/select-field";
 import { useIsDarkTheme } from "@/hooks/use-is-dark-theme";
 import { getChartTheme } from "@/lib/chart-theme";
-import { RESPONSES_SERIES } from "@/lib/dashboard-data";
+import { RESPONSES_SERIES, RESPONSES_BY_FORM, FORM_FILTER_OPTIONS } from "@/lib/dashboard-data";
 
 const RANGES = [
   { label: "7 hari", days: 7 },
@@ -14,9 +17,13 @@ const RANGES = [
 
 export function ResponsesAreaChart() {
   const [days, setDays] = useState(30);
+  const [formId, setFormId] = useState("all");
   const isDark = useIsDarkTheme();
   const theme = getChartTheme(isDark);
-  const data = RESPONSES_SERIES.slice(-days);
+
+  const series = formId === "all" ? RESPONSES_SERIES : RESPONSES_BY_FORM[formId];
+  const data = series.slice(-days);
+  const total = data.reduce((sum, point) => sum + point.count, 0);
 
   const option: EChartsOption = {
     grid: { top: 16, right: 16, bottom: 28, left: 36 },
@@ -71,28 +78,40 @@ export function ResponsesAreaChart() {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-5 shadow-[var(--elevation-1)]">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="text-[15px] font-medium text-ink">Respons masuk</h3>
-          <p className="text-[13px] text-muted">Tren pengumpulan data seluruh form</p>
+    <ChartCard
+      icon={<ChartLine />}
+      title="Respons masuk"
+      subtitle={`${total.toLocaleString("id-ID")} respons dalam ${days} hari terakhir`}
+      action={
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <SelectField
+            options={FORM_FILTER_OPTIONS.map((option) => ({ value: option.id, label: option.title }))}
+            value={formId}
+            onChange={setFormId}
+            ariaLabel="Filter form"
+            searchPlaceholder="Cari form…"
+            align="right"
+            size="sm"
+            className="w-44"
+          />
+          <div className="flex items-center gap-1 rounded-full border border-line bg-subtle p-1">
+            {RANGES.map((range) => (
+              <button
+                key={range.days}
+                type="button"
+                onClick={() => setDays(range.days)}
+                className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 ${
+                  days === range.days ? "bg-surface text-ink shadow-[var(--elevation-1)]" : "text-muted hover:text-ink"
+                }`}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-1 rounded-full border border-line bg-subtle p-1">
-          {RANGES.map((range) => (
-            <button
-              key={range.days}
-              type="button"
-              onClick={() => setDays(range.days)}
-              className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 ${
-                days === range.days ? "bg-surface text-ink shadow-[var(--elevation-1)]" : "text-muted hover:text-ink"
-              }`}
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      }
+    >
       <EChart option={option} style={{ height: 260 }} />
-    </div>
+    </ChartCard>
   );
 }
