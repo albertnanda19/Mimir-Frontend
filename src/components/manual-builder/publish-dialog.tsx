@@ -2,24 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle, Copy, GitBranch, Send } from "@mynaui/icons-react";
+import { ArrowUpRight, CheckCircle, Copy, GitBranch, Send } from "@mynaui/icons-react";
 import type { FormDraft } from "@/types/ai-builder";
 import { formatLogic } from "@/lib/logic";
+import { toSlug } from "@/lib/respondent";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function toSlug(title: string): string {
-  return (
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-")
-      .slice(0, 48) || "form-baru"
-  );
-}
 
 interface PublishDialogProps {
   draft: FormDraft;
@@ -30,7 +20,8 @@ export function PublishDialog({ draft, onClose }: PublishDialogProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const link = `https://mimir.app/f/${toSlug(draft.title)}`;
+  const slug = toSlug(draft.title);
+  const link = `https://mimir.app/f/${slug}`;
   const logicCount = draft.questions.filter((question) =>
     formatLogic(question.logic, draft.questions),
   ).length;
@@ -77,12 +68,22 @@ export function PublishDialog({ draft, onClose }: PublishDialogProps) {
               {isCopied ? "Tersalin" : "Salin"}
             </button>
           </div>
-          <Link
-            href="/dashboard"
-            className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded-md bg-brand text-sm font-medium text-white shadow-[var(--elevation-1)] transition-all duration-150 hover:bg-brand-hover active:scale-[0.98]"
-          >
-            Kembali ke dashboard
-          </Link>
+          <div className="flex w-full flex-col gap-2">
+            <Link
+              href={`/f/${slug}`}
+              target="_blank"
+              className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-md bg-brand text-sm font-medium text-white shadow-[var(--elevation-1)] transition-all duration-150 hover:bg-brand-hover active:scale-[0.98]"
+            >
+              Buka form
+              <ArrowUpRight className="size-4" />
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded-md text-sm font-medium text-muted transition-colors duration-150 hover:bg-overlay hover:text-ink"
+            >
+              Kembali ke dashboard
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
