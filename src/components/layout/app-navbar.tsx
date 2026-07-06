@@ -6,7 +6,7 @@ import { Grid, FileText, ChartLine, Plus } from "@mynaui/icons-react";
 import { MimirLogo } from "@/components/brand/mimir-logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
-import type { DummyUser } from "@/lib/auth-dummy";
+import type { AppUser } from "@/types/auth";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: Grid },
@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { href: "/analytics", label: "Analitik", icon: ChartLine },
 ];
 
-export function AppNavbar({ user }: { user: DummyUser | null }) {
+export function AppNavbar({ user }: { user: AppUser | null }) {
   const pathname = usePathname();
 
   return (

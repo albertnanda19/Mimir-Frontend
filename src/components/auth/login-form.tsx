@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, LockPassword, ArrowRight, Google } from "@mynaui/icons-react";
@@ -9,28 +9,39 @@ import { Button } from "@/components/ui/button";
 import { AuthHeading } from "@/components/auth/auth-heading";
 import { FormAlert } from "@/components/auth/form-alert";
 import { OrDivider } from "@/components/auth/or-divider";
-import { signIn, signInWithGoogle, DEMO_CREDENTIALS } from "@/lib/auth-dummy";
+import { createClient } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/supabase/errors";
 
 export function LoginForm() {
   const router = useRouter();
   const [isGooglePending, startGoogle] = useTransition();
+  const [googleError, setGoogleError] = useState<string | null>(null);
 
   const [error, submit, isPending] = useActionState(async (_prev: string | null, formData: FormData) => {
-    try {
-      await signIn(String(formData.get("email")), String(formData.get("password")));
-      router.push("/profile");
-      return null;
-    } catch (err) {
-      return err instanceof Error ? err.message : "Terjadi kesalahan.";
-    }
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: String(formData.get("email")),
+      password: String(formData.get("password")),
+    });
+    if (error) return authErrorMessage(error);
+    router.push("/dashboard");
+    router.refresh();
+    return null;
   }, null);
 
   function handleGoogle() {
+    setGoogleError(null);
     startGoogle(async () => {
-      await signInWithGoogle();
-      router.push("/profile");
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${location.origin}/auth/callback?next=/dashboard` },
+      });
+      if (error) setGoogleError(authErrorMessage(error));
     });
   }
+
+  const alertMessage = error ?? googleError;
 
   return (
     <div className="flex flex-col gap-7">
@@ -64,7 +75,7 @@ export function LoginForm() {
           </Link>
         </div>
 
-        {error && <FormAlert tone="danger">{error}</FormAlert>}
+        {alertMessage && <FormAlert tone="danger">{alertMessage}</FormAlert>}
 
         <Button type="submit" isLoading={isPending} className="mt-1">
           Masuk
@@ -77,11 +88,6 @@ export function LoginForm() {
       <Button variant="outline" onClick={handleGoogle} isLoading={isGooglePending} leadingIcon={<Google className="size-[18px]" />}>
         Lanjut dengan Google
       </Button>
-
-      <p className="rounded-md bg-subtle px-3.5 py-2.5 text-[13px] text-muted">
-        Demo: <span className="font-mono text-ink">{DEMO_CREDENTIALS.email}</span> ·{" "}
-        <span className="font-mono text-ink">{DEMO_CREDENTIALS.password}</span>
-      </p>
 
       <p className="text-center text-sm text-muted">
         Belum punya akun?{" "}

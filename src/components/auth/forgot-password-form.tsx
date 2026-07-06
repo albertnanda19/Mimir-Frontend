@@ -8,7 +8,8 @@ import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { AuthHeading } from "@/components/auth/auth-heading";
 import { FormAlert } from "@/components/auth/form-alert";
-import { requestPasswordReset } from "@/lib/auth-dummy";
+import { createClient } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/supabase/errors";
 
 interface ResetState {
   sentTo: string | null;
@@ -20,12 +21,12 @@ export function ForgotPasswordForm() {
   const [state, submit, isPending] = useActionState<ResetState, FormData>(
     async (_prev, formData) => {
       const email = String(formData.get("email"));
-      try {
-        await requestPasswordReset(email);
-        return { sentTo: email, error: null };
-      } catch (err) {
-        return { sentTo: null, error: err instanceof Error ? err.message : "Terjadi kesalahan." };
-      }
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${location.origin}/auth/callback?next=/reset-password`,
+      });
+      if (error) return { sentTo: null, error: authErrorMessage(error) };
+      return { sentTo: email, error: null };
     },
     { sentTo: null, error: null },
   );

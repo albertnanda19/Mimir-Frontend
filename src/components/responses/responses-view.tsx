@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   ArrowLeft,
@@ -16,7 +15,7 @@ import {
 } from "@mynaui/icons-react";
 import type { FormStatus } from "@/types/form";
 import { AppNavbar } from "@/components/layout/app-navbar";
-import { getSession, getSessionSnapshot, subscribeSession } from "@/lib/auth-dummy";
+import type { AppUser } from "@/types/auth";
 import { getFormResponses, subscribeResponses } from "@/lib/responses-data";
 import { ExportMenu } from "@/components/responses/export-menu";
 import { STATUS_META } from "@/lib/dashboard-data";
@@ -44,19 +43,11 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-export function ResponsesView({ formId }: { formId: string }) {
-  const router = useRouter();
-  const user = useSyncExternalStore(subscribeSession, getSessionSnapshot, () => null);
+export function ResponsesView({ formId, user }: { formId: string; user: AppUser }) {
   const data = useSyncExternalStore(subscribeResponses, () => getFormResponses(formId), () => null);
   const [tab, setTab] = useState<TabId>("table");
 
-  useEffect(() => {
-    if (!getSession()) {
-      router.replace("/login");
-    }
-  }, [router]);
-
-  if (!user || !data) {
+  if (!data) {
     return (
       <div className="min-h-dvh bg-subtle">
         <AppNavbar user={user} />

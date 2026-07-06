@@ -1,25 +1,14 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, Grid, Sparkles } from "@mynaui/icons-react";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { BuilderStepper } from "@/components/ai-builder/builder-stepper";
 import { AiBuilderWorkspace } from "@/components/ai-builder/ai-builder-workspace";
 import { ManualBuilderWorkspace } from "@/components/manual-builder/manual-builder-workspace";
-import { getSession, getSessionSnapshot, subscribeSession } from "@/lib/auth-dummy";
+import type { AppUser } from "@/types/auth";
 
-export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
-  const router = useRouter();
-  const user = useSyncExternalStore(subscribeSession, getSessionSnapshot, () => null);
-
-  useEffect(() => {
-    if (!getSession()) {
-      router.replace("/login");
-    }
-  }, [router]);
-
+export function BuilderView({ mode, user }: { mode: "ai" | "manual"; user: AppUser }) {
   return (
     <div className="flex min-h-dvh flex-col bg-subtle lg:h-dvh">
       <AppNavbar user={user} />
@@ -29,16 +18,7 @@ export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
           mode === "manual" ? "max-w-none" : "max-w-[90rem]"
         }`}
       >
-        {!user ? (
-          <div className="flex flex-1 flex-col gap-4">
-            <div className="h-9 w-64 animate-pulse rounded-md bg-overlay" />
-            <div className="grid flex-1 gap-4 lg:grid-cols-2">
-              <div className="h-[60dvh] animate-pulse rounded-xl bg-overlay lg:h-auto" />
-              <div className="hidden animate-pulse rounded-xl bg-overlay lg:block" />
-            </div>
-          </div>
-        ) : (
-          <>
+        <>
             <div className="flex items-center justify-between gap-3 pb-4">
               <div className="flex items-center gap-3">
                 <Link
@@ -76,8 +56,7 @@ export function BuilderView({ mode }: { mode: "ai" | "manual" }) {
             </div>
 
             {mode === "manual" ? <ManualBuilderWorkspace /> : <AiBuilderWorkspace />}
-          </>
-        )}
+        </>
       </main>
     </div>
   );

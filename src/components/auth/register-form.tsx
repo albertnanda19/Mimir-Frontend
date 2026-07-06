@@ -1,40 +1,80 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, Mail, LockPassword, ArrowRight, Google, Check } from "@mynaui/icons-react";
+import { User, Mail, LockPassword, ArrowRight, Google, Check, MailOpen } from "@mynaui/icons-react";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { AuthHeading } from "@/components/auth/auth-heading";
 import { FormAlert } from "@/components/auth/form-alert";
 import { OrDivider } from "@/components/auth/or-divider";
-import { signUp, signInWithGoogle } from "@/lib/auth-dummy";
+import { createClient } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/supabase/errors";
+
+interface RegisterState {
+  error: string | null;
+  confirmationSentTo: string | null;
+}
 
 export function RegisterForm() {
   const router = useRouter();
   const [isGooglePending, startGoogle] = useTransition();
+  const [googleError, setGoogleError] = useState<string | null>(null);
 
-  const [error, submit, isPending] = useActionState(async (_prev: string | null, formData: FormData) => {
-    const password = String(formData.get("password"));
-    if (password !== String(formData.get("confirm"))) {
-      return "Konfirmasi kata sandi tidak cocok.";
-    }
-    try {
-      await signUp(String(formData.get("name")), String(formData.get("email")));
-      router.push("/profile");
-      return null;
-    } catch (err) {
-      return err instanceof Error ? err.message : "Terjadi kesalahan.";
-    }
-  }, null);
+  const [state, submit, isPending] = useActionState<RegisterState, FormData>(
+    async (_prev, formData) => {
+      const email = String(formData.get("email"));
+      const password = String(formData.get("password"));
+      if (password !== String(formData.get("confirm"))) {
+        return { error: "Konfirmasi kata sandi tidak cocok.", confirmationSentTo: null };
+      }
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name: String(formData.get("name")) } },
+      });
+      if (error) return { error: authErrorMessage(error), confirmationSentTo: null };
+      if (!data.session) return { error: null, confirmationSentTo: email };
+      router.push("/dashboard");
+      router.refresh();
+      return { error: null, confirmationSentTo: null };
+    },
+    { error: null, confirmationSentTo: null },
+  );
 
   function handleGoogle() {
+    setGoogleError(null);
     startGoogle(async () => {
-      await signInWithGoogle();
-      router.push("/profile");
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${location.origin}/auth/callback?next=/dashboard` },
+      });
+      if (error) setGoogleError(authErrorMessage(error));
     });
   }
+
+  if (state.confirmationSentTo) {
+    return (
+      <div className="flex flex-col gap-6 text-center">
+        <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-brand-subtle text-brand animate-pop">
+          <MailOpen className="size-7" />
+        </span>
+        <AuthHeading title="Cek email kamu" subtitle="Kami sudah mengirim tautan konfirmasi untuk mengaktifkan akunmu." />
+        <p className="text-sm text-muted">
+          Tautan dikirim ke <span className="font-mono text-ink">{state.confirmationSentTo}</span>. Belum masuk? Cek
+          folder spam.
+        </p>
+        <Button variant="outline" onClick={() => router.push("/login")}>
+          Kembali ke halaman masuk
+        </Button>
+      </div>
+    );
+  }
+
+  const alertMessage = state.error ?? googleError;
 
   return (
     <div className="flex flex-col gap-7">
@@ -88,7 +128,7 @@ export function RegisterForm() {
           </span>
         </label>
 
-        {error && <FormAlert tone="danger">{error}</FormAlert>}
+        {alertMessage && <FormAlert tone="danger">{alertMessage}</FormAlert>}
 
         <Button type="submit" isLoading={isPending} className="mt-1">
           Buat akun

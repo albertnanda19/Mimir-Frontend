@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserCircle, Logout, ChevronDown } from "@mynaui/icons-react";
 import { Avatar } from "@/components/ui/avatar";
-import { signOut, type DummyUser } from "@/lib/auth-dummy";
+import { createClient } from "@/lib/supabase/client";
+import type { AppUser } from "@/types/auth";
 
-export function UserMenu({ user }: { user: DummyUser }) {
+export function UserMenu({ user }: { user: AppUser }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,8 +29,8 @@ export function UserMenu({ user }: { user: DummyUser }) {
     };
   }, [isOpen]);
 
-  function handleSignOut() {
-    signOut();
+  async function handleSignOut() {
+    await createClient().auth.signOut();
     router.replace("/login");
   }
 
