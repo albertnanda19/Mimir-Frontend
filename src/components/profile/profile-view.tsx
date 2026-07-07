@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { FormAlert } from "@/components/auth/form-alert";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/lib/toast";
 import { authErrorMessage } from "@/lib/supabase/errors";
 import type { AppUser } from "@/types/auth";
 
@@ -28,6 +29,7 @@ export function ProfileView({ user }: { user: AppUser }) {
       });
       if (error) return { ok: false, error: authErrorMessage(error) };
       router.refresh();
+      toast.success("Profil berhasil diperbarui.");
       return { ok: true, error: null };
     },
     { ok: false, error: null },
@@ -60,7 +62,6 @@ export function ProfileView({ user }: { user: AppUser }) {
               <TextField label="Nama lengkap" name="name" required defaultValue={user.name} icon={<User />} />
               <TextField label="Email" name="email" type="email" value={user.email} readOnly disabled icon={<Mail />} />
 
-              {state.ok && <FormAlert tone="success">Profil berhasil diperbarui.</FormAlert>}
               {state.error && <FormAlert tone="danger">{state.error}</FormAlert>}
 
               <Button type="submit" isLoading={isSaving} className="mt-1 w-auto self-start px-6">

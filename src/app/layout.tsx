@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -38,7 +39,10 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
