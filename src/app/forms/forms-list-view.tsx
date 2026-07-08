@@ -110,19 +110,21 @@ export function FormsListView({ user }: { user: AppUser }) {
       <div className="min-h-dvh bg-subtle">
         <AppNavbar user={user} />
         <main className="mx-auto flex w-full max-w-[80rem] flex-col gap-8 px-4 py-8 sm:px-8">
-          <div className="flex flex-col gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex animate-pulse flex-col gap-3 rounded-xl border border-line bg-surface p-5">
-                <div className="flex items-start justify-between">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="flex animate-pulse flex-col rounded-xl border border-line bg-surface">
+                <div className="flex items-start justify-between px-5 pt-4">
                   <div className="h-5 w-16 rounded-full bg-overlay" />
-                  <div className="size-9 rounded-lg bg-overlay" />
+                  <div className="size-8 rounded-lg bg-overlay" />
                 </div>
-                <div className="mt-1 h-6 w-3/4 rounded-md bg-overlay" />
-                <div className="mt-2 flex items-center justify-between">
+                <div className="flex flex-col gap-2 px-5 pb-4 pt-3">
+                  <div className="h-6 w-3/4 rounded-md bg-overlay" />
+                  <div className="h-4 w-40 rounded-md bg-overlay" />
+                </div>
+                <div className="flex items-center justify-between border-t border-line-subtle bg-subtle px-5 py-3">
                   <div className="h-7 w-20 rounded-md bg-overlay" />
-                  <div className="h-4 w-32 rounded-full bg-overlay" />
+                  <div className="h-4 w-24 rounded-full bg-overlay" />
                 </div>
-                <div className="h-4 w-48 rounded-md bg-overlay" />
               </div>
             ))}
           </div>
@@ -193,7 +195,7 @@ export function FormsListView({ user }: { user: AppUser }) {
                   type="button"
                   onClick={() => setSearchQuery("")}
                   aria-label="Hapus pencarian"
-                  className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-faint hover:bg-overlay hover:text-ink"
+                  className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded text-faint hover:bg-overlay hover:text-ink focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -206,7 +208,7 @@ export function FormsListView({ user }: { user: AppUser }) {
                   key={key}
                   type="button"
                   onClick={() => setFilter(key)}
-                  className={`cursor-pointer rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 ${
+                  className={`cursor-pointer rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 ${
                     filter === key
                       ? "bg-surface text-ink shadow-[var(--elevation-1)]"
                       : "text-muted hover:text-ink"
@@ -248,11 +250,12 @@ export function FormsListView({ user }: { user: AppUser }) {
               </div>
             )
           ) : (
-            <div className="flex flex-col gap-3">
-              {visible.map((form) => (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {visible.map((form, index) => (
                 <FormListItem
                   key={form.id}
                   form={form}
+                  index={index}
                   onDuplicate={handleDuplicate}
                   onDeleteRequest={handleDeleteRequest}
                 />
@@ -281,7 +284,7 @@ export function FormsListView({ user }: { user: AppUser }) {
               <button
                 type="button"
                 onClick={handleDeleteConfirm}
-                className="inline-flex h-11 flex-1 cursor-pointer items-center justify-center rounded-md bg-danger text-sm font-medium text-white transition-all hover:bg-red-700 active:scale-[0.98]"
+                className="inline-flex h-11 flex-1 cursor-pointer items-center justify-center rounded-md bg-danger text-sm font-medium text-white transition-all hover:bg-[var(--fenrir-600)] active:scale-[0.98]"
               >
                 Ya, hapus
               </button>
