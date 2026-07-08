@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { UserCircle, Logout, ChevronDown } from "@mynaui/icons-react";
+import { UserCircle, Logout, ChevronDown, Spinner } from "@mynaui/icons-react";
 import { Avatar } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage } from "@/lib/supabase/errors";
@@ -31,14 +31,18 @@ export function UserMenu({ user }: { user: AppUser }) {
     };
   }, [isOpen]);
 
-  async function handleSignOut() {
-    const { error } = await createClient().auth.signOut();
-    if (error) {
-      toast.error(authErrorMessage(error));
-      return;
-    }
-    toast.info("Kamu telah keluar. Sampai jumpa lagi!");
-    router.replace("/login");
+  const [isSigningOut, startSignOut] = useTransition();
+
+  function handleSignOut() {
+    startSignOut(async () => {
+      const { error } = await createClient().auth.signOut();
+      if (error) {
+        toast.error(authErrorMessage(error));
+        return;
+      }
+      toast.info("Kamu telah keluar. Sampai jumpa lagi!");
+      router.replace("/login");
+    });
   }
 
   return (
@@ -84,11 +88,12 @@ export function UserMenu({ user }: { user: AppUser }) {
           <button
             type="button"
             onClick={handleSignOut}
+            disabled={isSigningOut}
             role="menuitem"
-            className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-muted transition-colors duration-100 hover:bg-danger-subtle hover:text-danger-text"
+            className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-muted transition-colors duration-100 hover:bg-danger-subtle hover:text-danger-text disabled:pointer-events-none disabled:opacity-70"
           >
-            <Logout className="size-[18px]" />
-            Keluar
+            {isSigningOut ? <Spinner className="size-[18px] animate-spin" aria-hidden /> : <Logout className="size-[18px]" />}
+            {isSigningOut ? "Keluar..." : "Keluar"}
           </button>
         </div>
       )}
