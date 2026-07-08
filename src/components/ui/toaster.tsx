@@ -133,7 +133,7 @@ function ToastCard({ item, isTop }: { item: ToastItem; isTop: boolean }) {
         item.exiting ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100"
       }`}
     >
-      <div className={`min-h-0 overflow-hidden ${isTop ? "pb-2.5" : "pt-2.5"}`}>
+      <div className={`min-h-0 ${item.exiting ? "overflow-hidden" : ""} ${isTop ? "pb-2.5" : "pt-2.5"}`}>
         <div
           role={item.variant === "error" ? "alert" : "status"}
           onPointerDown={handlePointerDown}
