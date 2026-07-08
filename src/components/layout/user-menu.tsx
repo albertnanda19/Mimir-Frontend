@@ -6,6 +6,8 @@ import Link from "next/link";
 import { UserCircle, Logout, ChevronDown } from "@mynaui/icons-react";
 import { Avatar } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/supabase/errors";
+import { toast } from "@/lib/toast";
 import type { AppUser } from "@/types/auth";
 
 export function UserMenu({ user }: { user: AppUser }) {
@@ -30,7 +32,12 @@ export function UserMenu({ user }: { user: AppUser }) {
   }, [isOpen]);
 
   async function handleSignOut() {
-    await createClient().auth.signOut();
+    const { error } = await createClient().auth.signOut();
+    if (error) {
+      toast.error(authErrorMessage(error));
+      return;
+    }
+    toast.info("Kamu telah keluar. Sampai jumpa lagi!");
     router.replace("/login");
   }
 

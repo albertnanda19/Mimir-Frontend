@@ -7,13 +7,12 @@ import { Mail, ArrowLeft, MailOpen } from "@mynaui/icons-react";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { AuthHeading } from "@/components/auth/auth-heading";
-import { FormAlert } from "@/components/auth/form-alert";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage } from "@/lib/supabase/errors";
+import { toast } from "@/lib/toast";
 
 interface ResetState {
   sentTo: string | null;
-  error: string | null;
 }
 
 export function ForgotPasswordForm() {
@@ -25,10 +24,14 @@ export function ForgotPasswordForm() {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${location.origin}/auth/callback?next=/reset-password`,
       });
-      if (error) return { sentTo: null, error: authErrorMessage(error) };
-      return { sentTo: email, error: null };
+      if (error) {
+        toast.error(authErrorMessage(error));
+        return { sentTo: null };
+      }
+      toast.success(`Tautan reset dikirim ke ${email}.`);
+      return { sentTo: email };
     },
-    { sentTo: null, error: null },
+    { sentTo: null },
   );
 
   if (state.sentTo) {
@@ -63,8 +66,6 @@ export function ForgotPasswordForm() {
           placeholder="kamu@email.com"
           icon={<Mail />}
         />
-
-        {state.error && <FormAlert tone="danger">{state.error}</FormAlert>}
 
         <Button type="submit" isLoading={isPending} className="mt-1">
           Kirim tautan reset

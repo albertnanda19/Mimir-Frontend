@@ -1,33 +1,32 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, Mail, LockPassword, ArrowRight, Google, Check, MailOpen } from "@mynaui/icons-react";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { AuthHeading } from "@/components/auth/auth-heading";
-import { FormAlert } from "@/components/auth/form-alert";
 import { OrDivider } from "@/components/auth/or-divider";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage } from "@/lib/supabase/errors";
+import { toast } from "@/lib/toast";
 
 interface RegisterState {
-  error: string | null;
   confirmationSentTo: string | null;
 }
 
 export function RegisterForm() {
   const router = useRouter();
   const [isGooglePending, startGoogle] = useTransition();
-  const [googleError, setGoogleError] = useState<string | null>(null);
 
   const [state, submit, isPending] = useActionState<RegisterState, FormData>(
     async (_prev, formData) => {
       const email = String(formData.get("email"));
       const password = String(formData.get("password"));
       if (password !== String(formData.get("confirm"))) {
-        return { error: "Konfirmasi kata sandi tidak cocok.", confirmationSentTo: null };
+        toast.warning("Konfirmasi kata sandi tidak cocok.");
+        return { confirmationSentTo: null };
       }
       const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
@@ -35,24 +34,30 @@ export function RegisterForm() {
         password,
         options: { data: { name: String(formData.get("name")) } },
       });
-      if (error) return { error: authErrorMessage(error), confirmationSentTo: null };
-      if (!data.session) return { error: null, confirmationSentTo: email };
+      if (error) {
+        toast.error(authErrorMessage(error));
+        return { confirmationSentTo: null };
+      }
+      if (!data.session) {
+        toast.info(`Tautan konfirmasi dikirim ke ${email}.`);
+        return { confirmationSentTo: email };
+      }
+      toast.success("Akun berhasil dibuat. Selamat datang di Mimir!");
       router.push("/dashboard");
       router.refresh();
-      return { error: null, confirmationSentTo: null };
+      return { confirmationSentTo: null };
     },
-    { error: null, confirmationSentTo: null },
+    { confirmationSentTo: null },
   );
 
   function handleGoogle() {
-    setGoogleError(null);
     startGoogle(async () => {
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: `${location.origin}/auth/callback?next=/dashboard` },
       });
-      if (error) setGoogleError(authErrorMessage(error));
+      if (error) toast.error(authErrorMessage(error));
     });
   }
 
@@ -73,8 +78,6 @@ export function RegisterForm() {
       </div>
     );
   }
-
-  const alertMessage = state.error ?? googleError;
 
   return (
     <div className="flex flex-col gap-7">
@@ -127,8 +130,6 @@ export function RegisterForm() {
             <span className="font-medium text-brand-text">Kebijakan Privasi</span>.
           </span>
         </label>
-
-        {alertMessage && <FormAlert tone="danger">{alertMessage}</FormAlert>}
 
         <Button type="submit" isLoading={isPending} className="mt-1">
           Buat akun

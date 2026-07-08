@@ -1,47 +1,54 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, LockPassword, ArrowRight, Google } from "@mynaui/icons-react";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { AuthHeading } from "@/components/auth/auth-heading";
-import { FormAlert } from "@/components/auth/form-alert";
 import { OrDivider } from "@/components/auth/or-divider";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage } from "@/lib/supabase/errors";
+import { toast } from "@/lib/toast";
 
 export function LoginForm() {
   const router = useRouter();
   const [isGooglePending, startGoogle] = useTransition();
-  const [googleError, setGoogleError] = useState<string | null>(null);
 
-  const [error, submit, isPending] = useActionState(async (_prev: string | null, formData: FormData) => {
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("error") === "oauth") {
+      toast.error("Login dengan Google gagal. Silakan coba lagi.");
+      router.replace("/login");
+    }
+  }, [router]);
+
+  const [, submit, isPending] = useActionState(async (_prev: null, formData: FormData) => {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: String(formData.get("email")),
       password: String(formData.get("password")),
     });
-    if (error) return authErrorMessage(error);
+    if (error) {
+      toast.error(authErrorMessage(error));
+      return null;
+    }
+    toast.success("Berhasil masuk. Selamat datang kembali!");
     router.push("/dashboard");
     router.refresh();
     return null;
   }, null);
 
   function handleGoogle() {
-    setGoogleError(null);
     startGoogle(async () => {
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: `${location.origin}/auth/callback?next=/dashboard` },
       });
-      if (error) setGoogleError(authErrorMessage(error));
+      if (error) toast.error(authErrorMessage(error));
     });
   }
-
-  const alertMessage = error ?? googleError;
 
   return (
     <div className="flex flex-col gap-7">
@@ -74,8 +81,6 @@ export function LoginForm() {
             Lupa kata sandi?
           </Link>
         </div>
-
-        {alertMessage && <FormAlert tone="danger">{alertMessage}</FormAlert>}
 
         <Button type="submit" isLoading={isPending} className="mt-1">
           Masuk

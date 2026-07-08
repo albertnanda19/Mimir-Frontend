@@ -6,34 +6,28 @@ import { User, Mail, ShieldCheck } from "@mynaui/icons-react";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import { FormAlert } from "@/components/auth/form-alert";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
 import { authErrorMessage } from "@/lib/supabase/errors";
 import type { AppUser } from "@/types/auth";
 
-interface SaveState {
-  ok: boolean;
-  error: string | null;
-}
-
 export function ProfileView({ user }: { user: AppUser }) {
   const router = useRouter();
 
-  const [state, save, isSaving] = useActionState<SaveState, FormData>(
-    async (_prev, formData) => {
-      const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({
-        data: { name: String(formData.get("name")) },
-      });
-      if (error) return { ok: false, error: authErrorMessage(error) };
-      router.refresh();
-      toast.success("Profil berhasil diperbarui.");
-      return { ok: true, error: null };
-    },
-    { ok: false, error: null },
-  );
+  const [, save, isSaving] = useActionState(async (_prev: null, formData: FormData) => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({
+      data: { name: String(formData.get("name")) },
+    });
+    if (error) {
+      toast.error(authErrorMessage(error));
+      return null;
+    }
+    router.refresh();
+    toast.success("Profil berhasil diperbarui.");
+    return null;
+  }, null);
 
   return (
     <div className="min-h-dvh">
@@ -61,8 +55,6 @@ export function ProfileView({ user }: { user: AppUser }) {
             <form action={save} className="flex flex-col gap-4 pt-6">
               <TextField label="Nama lengkap" name="name" required defaultValue={user.name} icon={<User />} />
               <TextField label="Email" name="email" type="email" value={user.email} readOnly disabled icon={<Mail />} />
-
-              {state.error && <FormAlert tone="danger">{state.error}</FormAlert>}
 
               <Button type="submit" isLoading={isSaving} className="mt-1 w-auto self-start px-6">
                 Simpan perubahan

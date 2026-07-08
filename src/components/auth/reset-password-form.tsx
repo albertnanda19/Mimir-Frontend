@@ -6,21 +6,26 @@ import { LockPassword, ArrowRight } from "@mynaui/icons-react";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { AuthHeading } from "@/components/auth/auth-heading";
-import { FormAlert } from "@/components/auth/form-alert";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage } from "@/lib/supabase/errors";
+import { toast } from "@/lib/toast";
 
 export function ResetPasswordForm() {
   const router = useRouter();
 
-  const [error, submit, isPending] = useActionState(async (_prev: string | null, formData: FormData) => {
+  const [, submit, isPending] = useActionState(async (_prev: null, formData: FormData) => {
     const password = String(formData.get("password"));
     if (password !== String(formData.get("confirm"))) {
-      return "Konfirmasi kata sandi tidak cocok.";
+      toast.warning("Konfirmasi kata sandi tidak cocok.");
+      return null;
     }
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
-    if (error) return authErrorMessage(error);
+    if (error) {
+      toast.error(authErrorMessage(error));
+      return null;
+    }
+    toast.success("Kata sandi berhasil diubah.");
     router.push("/dashboard");
     router.refresh();
     return null;
@@ -50,8 +55,6 @@ export function ResetPasswordForm() {
           placeholder="Ulangi kata sandi baru"
           icon={<LockPassword />}
         />
-
-        {error && <FormAlert tone="danger">{error}</FormAlert>}
 
         <Button type="submit" isLoading={isPending} className="mt-1">
           Simpan kata sandi
