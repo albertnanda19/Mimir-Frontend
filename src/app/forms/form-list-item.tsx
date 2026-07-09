@@ -10,6 +10,7 @@ const STATUS_BADGE: Record<FormStatus, string> = {
   published: "bg-success-subtle text-success-text",
   draft: "bg-accent-subtle text-accent-text",
   closed: "bg-overlay text-muted",
+  archived: "bg-overlay text-faint",
 };
 
 interface FormListItemProps {

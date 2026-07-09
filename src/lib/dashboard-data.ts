@@ -1,12 +1,10 @@
 import type { FormStatus, FormSummary } from "@/types/form";
 
-const MONTHS_ID = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-const TODAY = new Date("2026-07-05T00:00:00");
-
 export const STATUS_META: Record<FormStatus, { label: string }> = {
   draft: { label: "Draft" },
   published: { label: "Terbit" },
   closed: { label: "Ditutup" },
+  archived: { label: "Arsip" },
 };
 
 export const DUMMY_FORMS: FormSummary[] = [
@@ -21,71 +19,3 @@ export const DUMMY_FORMS: FormSummary[] = [
   { id: "f_rsvp", title: "RSVP Pernikahan Adit & Sari", status: "closed", responses: 203, completionRate: 96, avgDurationSec: 51, createdAt: "2 Mei 2026", lastResponseAt: "18 Jun 2026" },
   { id: "f_kantin", title: "Polling Menu Kantin Kampus", status: "closed", responses: 587, completionRate: 88, avgDurationSec: 39, createdAt: "10 Apr 2026", lastResponseAt: "30 Mei 2026" },
 ];
-
-export interface DailyPoint {
-  label: string;
-  count: number;
-}
-
-function buildFormSeries(days: number, seed: number, scale: number): DailyPoint[] {
-  const points: DailyPoint[] = [];
-  for (let offset = days - 1; offset >= 0; offset -= 1) {
-    const date = new Date(TODAY);
-    date.setDate(TODAY.getDate() - offset);
-    const wave = 1 + 0.5 * Math.sin(offset / 2.6 + seed) + 0.3 * Math.cos(offset / 5 + seed * 2);
-    const weekend = date.getDay() === 0 || date.getDay() === 6 ? 0.35 : 0;
-    const trend = (days - offset) / (days * 3);
-    points.push({
-      label: `${date.getDate()} ${MONTHS_ID[date.getMonth()]}`,
-      count: Math.max(0, Math.round(scale * (wave + weekend + trend))),
-    });
-  }
-  return points;
-}
-
-const ACTIVE_FORMS = DUMMY_FORMS.filter((form) => form.responses > 0);
-
-export const RESPONSES_BY_FORM: Record<string, DailyPoint[]> = Object.fromEntries(
-  ACTIVE_FORMS.map((form, index) => [form.id, buildFormSeries(30, index * 1.7, form.responses / 90)]),
-);
-
-export const RESPONSES_SERIES: DailyPoint[] = Object.values(RESPONSES_BY_FORM)[0].map((point, dayIndex) => ({
-  label: point.label,
-  count: Object.values(RESPONSES_BY_FORM).reduce((sum, series) => sum + series[dayIndex].count, 0),
-}));
-
-export const FORM_FILTER_OPTIONS = [
-  { id: "all", title: "Semua form" },
-  ...ACTIVE_FORMS.map((form) => ({ id: form.id, title: form.title })),
-];
-
-export interface StatusSlice {
-  status: FormStatus;
-  label: string;
-  count: number;
-}
-
-export const STATUS_BREAKDOWN: StatusSlice[] = (Object.keys(STATUS_META) as FormStatus[]).map((status) => ({
-  status,
-  label: STATUS_META[status].label,
-  count: DUMMY_FORMS.filter((form) => form.status === status).length,
-}));
-
-export const TOP_FORMS = [...DUMMY_FORMS]
-  .filter((form) => form.responses > 0)
-  .sort((a, b) => b.responses - a.responses)
-  .slice(0, 5);
-
-const totalResponses = DUMMY_FORMS.reduce((sum, form) => sum + form.responses, 0);
-const answeredForms = DUMMY_FORMS.filter((form) => form.responses > 0);
-const last7 = RESPONSES_SERIES.slice(-7).reduce((sum, point) => sum + point.count, 0);
-const prev7 = RESPONSES_SERIES.slice(-14, -7).reduce((sum, point) => sum + point.count, 0);
-
-export const DASHBOARD_STATS = {
-  totalForms: DUMMY_FORMS.length,
-  totalResponses,
-  publishedForms: DUMMY_FORMS.filter((form) => form.status === "published").length,
-  avgCompletion: Math.round(answeredForms.reduce((sum, form) => sum + form.completionRate, 0) / answeredForms.length),
-  responsesLast7: last7,
-  responsesDeltaPct: Math.round(((last7 - prev7) / prev7) * 100),
-};

@@ -1,17 +1,46 @@
 "use client";
 
 import type { EChartsOption } from "echarts";
-import { ChartBar } from "@mynaui/icons-react";
+import { ChartBar, ChartBarIncreasing } from "@mynaui/icons-react";
 import { EChart } from "@/components/dashboard/echart";
 import { ChartCard } from "@/components/dashboard/chart-card";
+import { ChartEmptyState } from "@/components/dashboard/chart-empty-state";
+import { ChartErrorState } from "@/components/dashboard/chart-error-state";
 import { useIsDarkTheme } from "@/hooks/use-is-dark-theme";
 import { getChartTheme } from "@/lib/chart-theme";
-import { TOP_FORMS } from "@/lib/dashboard-data";
+import type { DashboardSummary, Result } from "@/types/dashboard";
 
-export function TopFormsChart() {
+interface TopFormsChartProps {
+  result: Result<DashboardSummary>;
+  onRetry: () => void;
+}
+
+export function TopFormsChart({ result, onRetry }: TopFormsChartProps) {
   const isDark = useIsDarkTheme();
   const theme = getChartTheme(isDark);
-  const ordered = [...TOP_FORMS].reverse();
+
+  if (!result.ok) {
+    return (
+      <ChartCard icon={<ChartBar />} title="Form paling ramai" subtitle="Peringkat berdasarkan jumlah respons">
+        <ChartErrorState message={result.message} onRetry={onRetry} className="h-[240px]" />
+      </ChartCard>
+    );
+  }
+
+  if (result.data.topForms.length === 0) {
+    return (
+      <ChartCard icon={<ChartBar />} title="Form paling ramai" subtitle="Peringkat berdasarkan jumlah respons">
+        <ChartEmptyState
+          icon={<ChartBarIncreasing className="size-6" />}
+          title="Belum ada yang naik takhta"
+          description="Form dengan respons terbanyak akan bersanding di sini. Terbitkan formmu dan kumpulkan respons pertama."
+          className="h-[240px]"
+        />
+      </ChartCard>
+    );
+  }
+
+  const ordered = [...result.data.topForms].reverse();
 
   const option: EChartsOption = {
     grid: { top: 8, right: 24, bottom: 8, left: 8, containLabel: true },

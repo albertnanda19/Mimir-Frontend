@@ -1,29 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { EChartsOption } from "echarts";
 import { ChartLine } from "@mynaui/icons-react";
 import { EChart } from "@/components/dashboard/echart";
 import { ChartCard } from "@/components/dashboard/chart-card";
+import { ChartEmptyState } from "@/components/dashboard/chart-empty-state";
+import { ChartErrorState } from "@/components/dashboard/chart-error-state";
 import { SelectField } from "@/components/ui/select-field";
 import { useIsDarkTheme } from "@/hooks/use-is-dark-theme";
 import { getChartTheme } from "@/lib/chart-theme";
-import { RESPONSES_SERIES, RESPONSES_BY_FORM, FORM_FILTER_OPTIONS } from "@/lib/dashboard-data";
+import { fetchSeries } from "@/lib/api/dashboard";
+import { getAccessToken } from "@/lib/api/token.client";
+import { apiErrorMessage } from "@/lib/api-client";
+import type { ResponseSeries, Result } from "@/types/dashboard";
 
-const RANGES = [
+const RANGES: { label: string; days: 7 | 30 }[] = [
   { label: "7 hari", days: 7 },
   { label: "30 hari", days: 30 },
 ];
 
-export function ResponsesAreaChart() {
-  const [days, setDays] = useState(30);
+type Phase = "loading" | "success" | "error";
+
+interface ResponsesAreaChartProps {
+  initial: Result<ResponseSeries>;
+  formOptions: { value: string; label: string }[];
+  refreshKey: number;
+}
+
+export function ResponsesAreaChart({ initial, formOptions, refreshKey }: ResponsesAreaChartProps) {
+  const [days, setDays] = useState<7 | 30>(30);
   const [formId, setFormId] = useState("all");
+  const [series, setSeries] = useState(initial.ok ? initial.data : null);
+  const [phase, setPhase] = useState<Phase>(initial.ok ? "success" : "error");
+  const [errorMessage, setErrorMessage] = useState(initial.ok ? "" : initial.message);
+  const skipFirstRun = useRef(true);
   const isDark = useIsDarkTheme();
   const theme = getChartTheme(isDark);
 
-  const series = formId === "all" ? RESPONSES_SERIES : RESPONSES_BY_FORM[formId];
-  const data = series.slice(-days);
-  const total = data.reduce((sum, point) => sum + point.count, 0);
+  async function load(targetFormId: string, targetDays: 7 | 30) {
+    setPhase("loading");
+    try {
+      const token = await getAccessToken();
+      setSeries(await fetchSeries(token, targetFormId, targetDays));
+      setPhase("success");
+    } catch (err) {
+      setErrorMessage(apiErrorMessage(err));
+      setPhase("error");
+    }
+  }
+
+  useEffect(() => {
+    if (skipFirstRun.current) {
+      skipFirstRun.current = false;
+      return;
+    }
+    load(formId, days);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formId, days, refreshKey]);
 
   const option: EChartsOption = {
     grid: { top: 16, right: 16, bottom: 28, left: 36 },
@@ -39,7 +73,7 @@ export function ResponsesAreaChart() {
     },
     xAxis: {
       type: "category",
-      data: data.map((point) => point.label),
+      data: series?.points.map((point) => point.label) ?? [],
       boundaryGap: false,
       axisLine: { lineStyle: { color: theme.axisLine } },
       axisTick: { show: false },
@@ -57,7 +91,7 @@ export function ResponsesAreaChart() {
         symbol: "circle",
         symbolSize: 7,
         showSymbol: false,
-        data: data.map((point) => point.count),
+        data: series?.points.map((point) => point.count) ?? [],
         lineStyle: { width: 2.5, color: theme.brand },
         itemStyle: { color: theme.brand, borderColor: theme.tooltipBg, borderWidth: 2 },
         areaStyle: {
@@ -81,11 +115,15 @@ export function ResponsesAreaChart() {
     <ChartCard
       icon={<ChartLine />}
       title="Respons masuk"
-      subtitle={`${total.toLocaleString("id-ID")} respons dalam ${days} hari terakhir`}
+      subtitle={
+        phase === "success" && series
+          ? `${series.total.toLocaleString("id-ID")} respons dalam ${days} hari terakhir`
+          : `${days} hari terakhir`
+      }
       action={
         <div className="flex flex-wrap items-center justify-end gap-2">
           <SelectField
-            options={FORM_FILTER_OPTIONS.map((option) => ({ value: option.id, label: option.title }))}
+            options={formOptions}
             value={formId}
             onChange={setFormId}
             ariaLabel="Filter form"
@@ -111,7 +149,20 @@ export function ResponsesAreaChart() {
         </div>
       }
     >
-      <EChart option={option} style={{ height: 260 }} />
+      {phase === "loading" ? (
+        <div className="h-[260px] animate-pulse rounded-lg bg-overlay" />
+      ) : phase === "error" ? (
+        <ChartErrorState message={errorMessage} onRetry={() => load(formId, days)} className="h-[260px]" />
+      ) : series && series.total === 0 ? (
+        <ChartEmptyState
+          icon={<ChartLine className="size-6" />}
+          title="Sungai respons masih tenang"
+          description="Belum ada respons pada rentang ini. Saat respons pertama tiba, arusnya akan tergambar di sini."
+          className="h-[260px]"
+        />
+      ) : (
+        <EChart option={option} style={{ height: 260 }} />
+      )}
     </ChartCard>
   );
 }

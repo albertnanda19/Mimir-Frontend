@@ -1,4 +1,4 @@
-export type FormStatus = "draft" | "published" | "closed";
+export type FormStatus = "draft" | "published" | "closed" | "archived";
 
 export interface FormSummary {
   id: string;

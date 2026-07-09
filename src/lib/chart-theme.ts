@@ -8,7 +8,7 @@ export interface ChartTheme {
   tooltipBg: string;
   tooltipBorder: string;
   tooltipText: string;
-  statusColors: Record<"draft" | "published" | "closed", string>;
+  statusColors: Record<"draft" | "published" | "closed" | "archived", string>;
 }
 
 export function getChartTheme(isDark: boolean): ChartTheme {
@@ -23,7 +23,7 @@ export function getChartTheme(isDark: boolean): ChartTheme {
       tooltipBg: "#1E2230",
       tooltipBorder: "#2E3448",
       tooltipText: "#E4E8F0",
-      statusColors: { published: "#4A87E0", draft: "#E0A030", closed: "#6B7494" },
+      statusColors: { published: "#4A87E0", draft: "#E0A030", closed: "#6B7494", archived: "#454D66" },
     };
   }
   return {
@@ -36,6 +36,6 @@ export function getChartTheme(isDark: boolean): ChartTheme {
     tooltipBg: "#FFFFFF",
     tooltipBorder: "#C8D0DC",
     tooltipText: "#0D0F14",
-    statusColors: { published: "#2B6ACC", draft: "#CC8010", closed: "#A0AABB" },
+    statusColors: { published: "#2B6ACC", draft: "#CC8010", closed: "#A0AABB", archived: "#C8D0DC" },
   };
 }
